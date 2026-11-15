@@ -18,9 +18,8 @@ const booleanString = z
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   DATABASE_URL: z.url({ message: 'DATABASE_URL must be a postgresql:// connection string' }),
-  SESSION_MAX_AGE_DAYS: z.coerce.number().int().positive().default(7),
-  /** Bypass login and run without a database. Development only. */
-  SKIP_AUTH: booleanString,
+  BETTER_AUTH_SECRET: z.string().min(32).optional(),
+  BETTER_AUTH_URL: z.url().default('http://localhost:3000'),
   LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info'),
   PRISMA_LOG_QUERIES: booleanString,
 });
@@ -33,8 +32,8 @@ function loadEnv(): Env {
     const lines = parsed.error.issues.map((issue) => `  ${issue.path.join('.')}: ${issue.message}`);
     throw new Error(`Invalid environment variables:\n${lines.join('\n')}\nSee .env.example.`);
   }
-  if (parsed.data.SKIP_AUTH && parsed.data.NODE_ENV === 'production') {
-    throw new Error('SKIP_AUTH=true is not allowed when NODE_ENV=production.');
+  if (parsed.data.NODE_ENV === 'production' && !parsed.data.BETTER_AUTH_SECRET) {
+    throw new Error('BETTER_AUTH_SECRET is required when NODE_ENV=production.');
   }
   return parsed.data;
 }

@@ -1,6 +1,6 @@
 import { locale } from '@/lib/locale';
-import { en } from './en';
-import { fa } from './fa';
+import { en } from './legacy-en';
+import { fa } from './legacy-fa';
 
 /**
  * The active dictionary. `t()` / `tp()` read from here and nowhere else.

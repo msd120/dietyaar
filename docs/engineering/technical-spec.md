@@ -17,9 +17,9 @@ The design optimizes for learning, near-zero infrastructure cost, and safe funda
 
 ### Revision history
 
-| Version | Date | Change |
-|---|---|---|
-| 1.0-draft | 2026-11-15 | Initial implementation-ready educational-MVP baseline assembled from product/design sources and owner clarifications. |
+| Version   | Date       | Change                                                                                                                                                                                                                  |
+| --------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.0-draft | 2026-11-15 | Initial implementation-ready educational-MVP baseline assembled from product/design sources and owner clarifications.                                                                                                   |
 | 1.1-draft | 2026-11-15 | Specification audit: expanded logical database contracts, module boundaries, execution paths, security/job/AI contracts, capacity assumptions, dependency inventory, and release evidence. No product decision changed. |
 
 Document changes require a pull request. A change that alters product behavior, privacy, cost, provider commitment, data retention, or an approved ADR requires owner approval. Pure clarification that preserves behavior may be reviewed as an engineering change. When source documents disagree, section 1 governs and the conflict must remain visible until the source is separately updated.
@@ -45,16 +45,16 @@ Decision labels:
 
 The following are intentional clarifications. Do not silently “correct” them back to the older source wording.
 
-| Source statement | Approved technical baseline |
-|---|---|
-| Email OTP authentication | Open public registration with unique username and password; no email/phone, email verification, or email reset. Better Auth is preferred, subject to verification. |
-| Account recovery via email | Username plus a hashed, single-use user-held recovery code. Losing password and code makes recovery impossible. |
-| AI plan extraction and AI reflection required/active | Optional feature-flagged enhancements; manual plan entry and deterministic reflections define core completion. |
-| Product v1.2 requires meal-photo recognition | Preserved in architecture and UX but optional and feature-flagged for the educational MVP. |
-| Optional web push | Deferred. No service worker, permission prompt, push subscription, or background notification delivery. |
-| Proposed 24-hour RPO/RTO | Best-effort only while using Supabase Free. Do not represent a guarantee. |
-| Account deletion may queue/finish within seven days | Immediate, irreversible application-data deletion after password reauthentication; storage cleanup may retry. |
-| Retained plan source images may be supported | Images are temporary and deleted after successful plan activation; abandoned media expires after seven days. |
+| Source statement                                     | Approved technical baseline                                                                                                                                        |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Email OTP authentication                             | Open public registration with unique username and password; no email/phone, email verification, or email reset. Better Auth is preferred, subject to verification. |
+| Account recovery via email                           | Username plus a hashed, single-use user-held recovery code. Losing password and code makes recovery impossible.                                                    |
+| AI plan extraction and AI reflection required/active | Optional feature-flagged enhancements; manual plan entry and deterministic reflections define core completion.                                                     |
+| Product v1.2 requires meal-photo recognition         | Preserved in architecture and UX but optional and feature-flagged for the educational MVP.                                                                         |
+| Optional web push                                    | Deferred. No service worker, permission prompt, push subscription, or background notification delivery.                                                            |
+| Proposed 24-hour RPO/RTO                             | Best-effort only while using Supabase Free. Do not represent a guarantee.                                                                                          |
+| Account deletion may queue/finish within seven days  | Immediate, irreversible application-data deletion after password reauthentication; storage cleanup may retry.                                                      |
+| Retained plan source images may be supported         | Images are temporary and deleted after successful plan activation; abandoned media expires after seven days.                                                       |
 
 Authentication pages and journeys A01/A02/J01 must be implemented with equivalent username/password registration, login, and recovery-code screens rather than email-code controls. Push-specific states are future design references, not active MVP surfaces.
 
@@ -87,40 +87,40 @@ No public API, microservices, Redis, offline synchronization, PWA/service worker
 
 ### 2.4 Glossary
 
-| Term | Technical meaning |
-|---|---|
-| Actor | User identity derived from a verified Better Auth server session. Never a client-supplied user ID. |
-| Canonical value | Locale-independent persisted value, such as grams, kilograms, kcal, UTC instant, or Gregorian ISO local date. |
-| Draft | Mutable, user-owned work that has no effect on confirmed totals or comparisons. |
-| Confirmed meal | Immutable-at-confirmation nutrient snapshot that contributes to daily totals; later edits create a new revision. |
-| Plan version | Immutable activated snapshot with a non-overlapping effective interval. |
-| Local date | Gregorian `YYYY-MM-DD` representing the user's chosen calendar day in `timezoneAtEntry`; distinct from a UTC instant. |
-| Known total | Sum of non-null confirmed nutrient values. It is not a complete total when any contributor is unknown. |
-| Source revision | Monotonic revision of inputs used to compute a summary/reflection. |
-| Owner-scoped query | Database operation whose predicate includes the authenticated owner, directly or through a verified parent relation. |
-| Idempotency key | Client-generated opaque key that makes a logical mutation produce at most one committed result. |
-| Lease | Time-bounded exclusive claim that permits a worker to process a job and permits recovery after worker failure. |
-| Sanitized media | Validated, metadata-stripped/re-encoded private object approved for temporary application use. |
-| Core mode | Web-only deployment; all manual and deterministic flows operate without worker or AI. |
-| Enhanced mode | Web plus optional worker and configured AI provider. |
+| Term               | Technical meaning                                                                                                     |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| Actor              | User identity derived from a verified Better Auth server session. Never a client-supplied user ID.                    |
+| Canonical value    | Locale-independent persisted value, such as grams, kilograms, kcal, UTC instant, or Gregorian ISO local date.         |
+| Draft              | Mutable, user-owned work that has no effect on confirmed totals or comparisons.                                       |
+| Confirmed meal     | Immutable-at-confirmation nutrient snapshot that contributes to daily totals; later edits create a new revision.      |
+| Plan version       | Immutable activated snapshot with a non-overlapping effective interval.                                               |
+| Local date         | Gregorian `YYYY-MM-DD` representing the user's chosen calendar day in `timezoneAtEntry`; distinct from a UTC instant. |
+| Known total        | Sum of non-null confirmed nutrient values. It is not a complete total when any contributor is unknown.                |
+| Source revision    | Monotonic revision of inputs used to compute a summary/reflection.                                                    |
+| Owner-scoped query | Database operation whose predicate includes the authenticated owner, directly or through a verified parent relation.  |
+| Idempotency key    | Client-generated opaque key that makes a logical mutation produce at most one committed result.                       |
+| Lease              | Time-bounded exclusive claim that permits a worker to process a job and permits recovery after worker failure.        |
+| Sanitized media    | Validated, metadata-stripped/re-encoded private object approved for temporary application use.                        |
+| Core mode          | Web-only deployment; all manual and deterministic flows operate without worker or AI.                                 |
+| Enhanced mode      | Web plus optional worker and configured AI provider.                                                                  |
 
 ## 3. Technology baseline and dependency policy
 
-| Layer | Decision | Status |
-|---|---|---|
-| Runtime | Current supported Node.js LTS; pin in `.nvmrc` and Docker | Recommended |
-| Web | Next.js App Router, React, strict TypeScript | Confirmed |
-| Localization | `next-intl`, `/fa/...` and `/en/...`; Persian default | Confirmed |
-| UI | Tailwind CSS; locally owned accessible shadcn/Radix primitives | Confirmed |
-| Forms/validation | React Hook Form and Zod; server validation authoritative | Confirmed |
-| Persistence | Supabase Free PostgreSQL through Prisma | Confirmed |
-| Authentication | Better Auth username/password and sessions behind `IdentityService` | Preferred; verification gate |
-| Storage | Private Supabase Storage behind `MediaStorage` | Confirmed |
-| Jobs | PostgreSQL-backed queue; optional worker from same image | Confirmed |
-| Nutrition | Versioned seeded catalog plus manual/user food fallback | Confirmed |
-| AI | Provider-neutral adapter; DeepSeek first candidate | Preferred; optional |
-| Tests | Vitest, PostgreSQL integration tests, Playwright | Confirmed |
-| Delivery | GitHub Actions checks; Darkube Git/Docker deployment | Confirmed; platform verification |
+| Layer            | Decision                                                            | Status                           |
+| ---------------- | ------------------------------------------------------------------- | -------------------------------- |
+| Runtime          | Current supported Node.js LTS; pin in `.nvmrc` and Docker           | Recommended                      |
+| Web              | Next.js App Router, React, strict TypeScript                        | Confirmed                        |
+| Localization     | `next-intl`, `/fa/...` and `/en/...`; Persian default               | Confirmed                        |
+| UI               | Tailwind CSS; locally owned accessible shadcn/Radix primitives      | Confirmed                        |
+| Forms/validation | React Hook Form and Zod; server validation authoritative            | Confirmed                        |
+| Persistence      | Supabase Free PostgreSQL through Prisma                             | Confirmed                        |
+| Authentication   | Better Auth username/password and sessions behind `IdentityService` | Preferred; verification gate     |
+| Storage          | Private Supabase Storage behind `MediaStorage`                      | Confirmed                        |
+| Jobs             | PostgreSQL-backed queue; optional worker from same image            | Confirmed                        |
+| Nutrition        | Versioned seeded catalog plus manual/user food fallback             | Confirmed                        |
+| AI               | Provider-neutral adapter; DeepSeek first candidate                  | Preferred; optional              |
+| Tests            | Vitest, PostgreSQL integration tests, Playwright                    | Confirmed                        |
+| Delivery         | GitHub Actions checks; Darkube Git/Docker deployment                | Confirmed; platform verification |
 
 Do not copy the boilerplate lockfile unchanged. At project initialization, select mutually compatible stable versions, upgrade all known critical/high vulnerabilities, commit the lockfile, run build/tests/audit, and record the adopted upstream commit. Critical production dependency findings block deployment; educational-only development-tool findings require documented assessment.
 
@@ -155,15 +155,15 @@ The browser never receives database credentials, Supabase service-role credentia
 
 ### 4.2 Execution paths and trust boundaries
 
-| Path | Trusted boundary and sequence | Failure/degraded behavior |
-|---|---|---|
-| Page read | Browser → locale proxy → Server Component → session → application service → Prisma | Unauthenticated redirects to localized login; database failure renders retryable page boundary without cached private data. |
-| Form mutation | Client island → Server Action → session/ownership → Zod → service transaction → revalidation | Field errors are localized; conflict retains draft; no success UI before commit. |
-| Authentication | Browser → Better Auth Route Handler → Better Auth tables/session cookie | Generic errors and persistent throttling; no domain service trusts an unverified cookie. |
-| Media upload | Browser requests authorization → server creates owned media row/signed upload → browser uploads → server finalizes/validates | Unfinalized object is unusable and expires; declared metadata never substitutes for server verification. |
-| AI request | Owned draft/media → durable job → worker rechecks feature/consent/revision → provider → schema validation → draft proposal | Timeout/provider/schema failure returns safe status and manual fallback; no confirmed record changes. |
-| Deterministic reflection | Today read → summary service → localized template → unique reflection insert | Works in core mode; concurrent requests converge on `(userId, localDate)`. |
-| Account deletion | Reauthentication → terminal deletion state/session revocation → domain deletion → object cleanup | Account becomes unusable before best-effort external cleanup; cleanup carries no reusable identity credential. |
+| Path                     | Trusted boundary and sequence                                                                                                | Failure/degraded behavior                                                                                                   |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Page read                | Browser → locale proxy → Server Component → session → application service → Prisma                                           | Unauthenticated redirects to localized login; database failure renders retryable page boundary without cached private data. |
+| Form mutation            | Client island → Server Action → session/ownership → Zod → service transaction → revalidation                                 | Field errors are localized; conflict retains draft; no success UI before commit.                                            |
+| Authentication           | Browser → Better Auth Route Handler → Better Auth tables/session cookie                                                      | Generic errors and persistent throttling; no domain service trusts an unverified cookie.                                    |
+| Media upload             | Browser requests authorization → server creates owned media row/signed upload → browser uploads → server finalizes/validates | Unfinalized object is unusable and expires; declared metadata never substitutes for server verification.                    |
+| AI request               | Owned draft/media → durable job → worker rechecks feature/consent/revision → provider → schema validation → draft proposal   | Timeout/provider/schema failure returns safe status and manual fallback; no confirmed record changes.                       |
+| Deterministic reflection | Today read → summary service → localized template → unique reflection insert                                                 | Works in core mode; concurrent requests converge on `(userId, localDate)`.                                                  |
+| Account deletion         | Reauthentication → terminal deletion state/session revocation → domain deletion → object cleanup                             | Account becomes unusable before best-effort external cleanup; cleanup carries no reusable identity credential.              |
 
 Trust boundaries are: untrusted browser input; trusted application process; separately trusted database/storage providers; and untrusted-by-default AI output. Signed URLs grant only narrow object/time capability and are themselves secrets. Supabase dashboard/service credentials and Better Auth secrets exist only in server/worker environments.
 
@@ -242,18 +242,18 @@ Use a modular monolith, not generic repository layers for every table. Introduce
 
 Each domain module exports a small service API and owns writes to its tables. Other modules may consume read models or call the service; they may not mutate another module's Prisma models directly.
 
-| Module | Owns | Key public operations |
-|---|---|---|
-| Identity | Better Auth integration, recovery credential, auth throttles | register, authenticate, reauthenticate, recover, rotate code, revoke, delete identity |
-| Profiles | profile, consent, preferences, onboarding state | read/update profile, advance onboarding, grant/revoke consent |
-| Plans | plan drafts, immutable versions/days/slots/rules | create/edit draft, activate, replace, correct history, get applicable version |
-| Nutrition | catalog versions/foods/servings and user foods | search, resolve portion, create/update private food, snapshot nutrients |
-| Meals | meal drafts/items, confirmed meals/items, saved meals | edit draft, confirm, revise, delete/undo, save/reuse snapshot |
-| Days | day state, slot occurrences, derived summaries | complete/reopen, mark slot, rebuild/read summary |
-| Reflections | reflection and feedback | get/create deterministic, enqueue AI, set/remove feedback |
-| Media | media metadata and storage adapter | authorize, finalize, sign read, attach, delete, expire |
-| Jobs | durable queue and leases | enqueue, claim, heartbeat, succeed, retry/fail/cancel |
-| Accounts | export and deletion orchestration | request/build export, begin/finish deletion |
+| Module      | Owns                                                         | Key public operations                                                                 |
+| ----------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| Identity    | Better Auth integration, recovery credential, auth throttles | register, authenticate, reauthenticate, recover, rotate code, revoke, delete identity |
+| Profiles    | profile, consent, preferences, onboarding state              | read/update profile, advance onboarding, grant/revoke consent                         |
+| Plans       | plan drafts, immutable versions/days/slots/rules             | create/edit draft, activate, replace, correct history, get applicable version         |
+| Nutrition   | catalog versions/foods/servings and user foods               | search, resolve portion, create/update private food, snapshot nutrients               |
+| Meals       | meal drafts/items, confirmed meals/items, saved meals        | edit draft, confirm, revise, delete/undo, save/reuse snapshot                         |
+| Days        | day state, slot occurrences, derived summaries               | complete/reopen, mark slot, rebuild/read summary                                      |
+| Reflections | reflection and feedback                                      | get/create deterministic, enqueue AI, set/remove feedback                             |
+| Media       | media metadata and storage adapter                           | authorize, finalize, sign read, attach, delete, expire                                |
+| Jobs        | durable queue and leases                                     | enqueue, claim, heartbeat, succeed, retry/fail/cancel                                 |
+| Accounts    | export and deletion orchestration                            | request/build export, begin/finish deletion                                           |
 
 The service initiating a multi-module business operation owns its transaction and calls transaction-aware internal functions with a Prisma transaction client. Do not start nested independent transactions. External network calls never occur inside a database transaction. Instead, commit intent/job state, perform I/O, then commit a revision-checked result.
 
@@ -386,17 +386,17 @@ Represent plan contents structurally rather than as a single JSON blob:
 
 ### 9.8 Retention matrix
 
-| Data | Retention in active account | Deletion trigger |
-|---|---|---|
-| Confirmed plans/meals/weights/reflections | Until user deletes entity or account | Explicit entity/account deletion |
-| Drafts without confirmation | Seven days after last activity unless actively resumed | Cleanup job/on-access cleanup |
-| Uploaded/processed meal or plan images | Through review/confirmation only | Confirmation, cancellation, seven-day expiry, or account deletion |
-| AI structured analysis metadata | Safe operational metadata for 30 days; proposal retained only with its draft | Expiry/account deletion; raw media follows media rule |
-| Export objects | Short-lived, recommended 24 hours | Expiry/account deletion |
-| Jobs | Payload/result minimized; terminal records recommended 30 days | Cleanup/account deletion |
-| Rate-limit buckets | Window plus short abuse-review period, recommended seven days | Scheduled/on-access cleanup |
-| Audit events | Educational MVP recommendation 90 days, excluding sensitive content | Expiry/account deletion where applicable |
-| External best-effort backups | Until documented backup expiration | Backup rotation; deletion is not immediate inside existing dump |
+| Data                                      | Retention in active account                                                  | Deletion trigger                                                  |
+| ----------------------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Confirmed plans/meals/weights/reflections | Until user deletes entity or account                                         | Explicit entity/account deletion                                  |
+| Drafts without confirmation               | Seven days after last activity unless actively resumed                       | Cleanup job/on-access cleanup                                     |
+| Uploaded/processed meal or plan images    | Through review/confirmation only                                             | Confirmation, cancellation, seven-day expiry, or account deletion |
+| AI structured analysis metadata           | Safe operational metadata for 30 days; proposal retained only with its draft | Expiry/account deletion; raw media follows media rule             |
+| Export objects                            | Short-lived, recommended 24 hours                                            | Expiry/account deletion                                           |
+| Jobs                                      | Payload/result minimized; terminal records recommended 30 days               | Cleanup/account deletion                                          |
+| Rate-limit buckets                        | Window plus short abuse-review period, recommended seven days                | Scheduled/on-access cleanup                                       |
+| Audit events                              | Educational MVP recommendation 90 days, excluding sensitive content          | Expiry/account deletion where applicable                          |
+| External best-effort backups              | Until documented backup expiration                                           | Backup rotation; deletion is not immediate inside existing dump   |
 
 ## 10. Deterministic calculations
 
@@ -430,15 +430,15 @@ Every mutation affecting a confirmed meal, plan timeline, slot state, or complet
 
 ### 10.2 Transaction and concurrency matrix
 
-| Operation | Atomic requirements |
-|---|---|
-| Register | Identity + recovery hash + initial profile shell; failure leaves no usable partial account. |
-| Recover account | Consume code + password update + new recovery hash + session revocation. |
-| Activate/replace plan | Lock/validate timeline + create immutable snapshot + close predecessor + audit + invalidate affected summaries + consume idempotency key. |
-| Confirm meal | Validate current draft revision + create meal/item snapshots + slot-state update + reopen day + invalidate summary + consume idempotency key. |
-| Revise/delete meal | Expected revision + new snapshot/tombstone + reopen day + summary invalidation. |
-| Historical plan correction | Lock timeline + add correction version + audit affected range + enqueue/mark recomputation. |
-| Account deletion | Terminal account state/session revocation precedes domain removal; storage cleanup is outbox/job work after commit. |
+| Operation                  | Atomic requirements                                                                                                                           |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Register                   | Identity + recovery hash + initial profile shell; failure leaves no usable partial account.                                                   |
+| Recover account            | Consume code + password update + new recovery hash + session revocation.                                                                      |
+| Activate/replace plan      | Lock/validate timeline + create immutable snapshot + close predecessor + audit + invalidate affected summaries + consume idempotency key.     |
+| Confirm meal               | Validate current draft revision + create meal/item snapshots + slot-state update + reopen day + invalidate summary + consume idempotency key. |
+| Revise/delete meal         | Expected revision + new snapshot/tombstone + reopen day + summary invalidation.                                                               |
+| Historical plan correction | Lock timeline + add correction version + audit affected range + enqueue/mark recomputation.                                                   |
+| Account deletion           | Terminal account state/session revocation precedes domain removal; storage cleanup is outbox/job work after commit.                           |
 
 Use database uniqueness as the final duplicate defense. Application checks improve messages but cannot replace constraints.
 
@@ -703,20 +703,20 @@ Nutrition seed is separate and idempotent by catalog version. Production seeding
 
 Exact versions are selected and locked during foundation work, not guessed in this document.
 
-| Dependency/category | Purpose | Required? | Policy |
-|---|---|---|---|
-| Next.js, React, TypeScript | application/runtime/types | Yes | Upgrade boilerplate to mutually supported patched versions; consult installed Next docs. |
-| Prisma client/CLI | PostgreSQL access and migrations | Yes | Keep client/CLI identical; verify Supabase pooler and Better Auth adapter. |
-| Better Auth and Prisma adapter/plugins | identity/session/username integration | Yes, preferred pending spike | Pin exact version; review migrations/changelog before upgrades. |
-| `next-intl` | messages, locale routing, server/client locale context | Yes | Verify pinned Next.js App Router compatibility. |
-| Zod, React Hook Form/resolver | boundary validation/forms | Yes | Server remains authoritative; bound collection sizes. |
-| Tailwind, Radix/shadcn source, Lucide | UI/accessibility | Yes | App imports locally owned primitives; avoid duplicate component libraries. |
-| Supabase JS/storage client | signed private storage operations only | Yes | Server-only privileged client; do not use database/PostgREST from browser. |
-| Image processing library | metadata stripping/re-encoding | Recommended after memory spike | Prefer maintained native package; pin patched binary and test Docker runtime. |
-| PostgreSQL job helper/library | queue mechanics | Optional | Prefer small in-repo SQL/service contract; add a library only if it reduces tested complexity without Redis. |
-| AI provider SDK | optional provider adapter | Optional | Prefer standard `fetch` if official SDK adds little; server-only and independently replaceable. |
-| Vitest, Playwright, test factories | test layers | Yes | Pin compatible versions; browsers installed only in test/CI stages. |
-| Pino or equivalent | structured logging | Yes | Redaction tests required. |
+| Dependency/category                    | Purpose                                                | Required?                      | Policy                                                                                                       |
+| -------------------------------------- | ------------------------------------------------------ | ------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| Next.js, React, TypeScript             | application/runtime/types                              | Yes                            | Upgrade boilerplate to mutually supported patched versions; consult installed Next docs.                     |
+| Prisma client/CLI                      | PostgreSQL access and migrations                       | Yes                            | Keep client/CLI identical; verify Supabase pooler and Better Auth adapter.                                   |
+| Better Auth and Prisma adapter/plugins | identity/session/username integration                  | Yes, preferred pending spike   | Pin exact version; review migrations/changelog before upgrades.                                              |
+| `next-intl`                            | messages, locale routing, server/client locale context | Yes                            | Verify pinned Next.js App Router compatibility.                                                              |
+| Zod, React Hook Form/resolver          | boundary validation/forms                              | Yes                            | Server remains authoritative; bound collection sizes.                                                        |
+| Tailwind, Radix/shadcn source, Lucide  | UI/accessibility                                       | Yes                            | App imports locally owned primitives; avoid duplicate component libraries.                                   |
+| Supabase JS/storage client             | signed private storage operations only                 | Yes                            | Server-only privileged client; do not use database/PostgREST from browser.                                   |
+| Image processing library               | metadata stripping/re-encoding                         | Recommended after memory spike | Prefer maintained native package; pin patched binary and test Docker runtime.                                |
+| PostgreSQL job helper/library          | queue mechanics                                        | Optional                       | Prefer small in-repo SQL/service contract; add a library only if it reduces tested complexity without Redis. |
+| AI provider SDK                        | optional provider adapter                              | Optional                       | Prefer standard `fetch` if official SDK adds little; server-only and independently replaceable.              |
+| Vitest, Playwright, test factories     | test layers                                            | Yes                            | Pin compatible versions; browsers installed only in test/CI stages.                                          |
+| Pino or equivalent                     | structured logging                                     | Yes                            | Redaction tests required.                                                                                    |
 
 Avoid adding a client state framework, generic repository framework, API client generator, Redis client, service worker package, charting suite, or analytics SDK without a documented requirement. Renovate may propose updates, but automerge is allowed only for changes that pass all gates and do not cross framework/database/auth major versions.
 
@@ -734,56 +734,56 @@ Do not begin optional AI work before the manual vertical slice passes end to end
 
 ## 27. Architecture decision register
 
-| ID | Decision | Class | Rationale/implication |
-|---|---|---|---|
-| ADR-001 | Modular monolith and boilerplate service boundaries | Confirmed | Lowest complexity; testable domain services. |
-| ADR-002 | Darkube web hosting; Supabase Free DB/storage | Confirmed | Near-zero cost; external latency/quotas and pause risk accepted. |
-| ADR-003 | Better Auth embedded behind `IdentityService` | Preferred/verify | Avoid custom auth; requires compatibility/security spike. |
-| ADR-004 | Public username/password and recovery code | Confirmed | No email dependency; loss of both credentials is unrecoverable. |
-| ADR-005 | Server-only Prisma ownership; defer custom RLS | Confirmed | Straightforward MVP isolation; requires disciplined queries/tests. |
-| ADR-006 | `next-intl`, locale-prefixed routes | Confirmed | Runtime bilingual RTL/LTR in one app. |
-| ADR-007 | Hybrid Server Actions/Route Handlers | Confirmed | Aligns with Next.js and avoids unnecessary public API. |
-| ADR-008 | Local versioned nutrition seed | Confirmed | Deterministic, low-cost, Iran-focused; limited initial coverage. |
-| ADR-009 | Optional PostgreSQL worker, no Redis | Confirmed | Durable optional AI jobs with minimal infrastructure. |
-| ADR-010 | Three AI features optional/feature-flagged | Confirmed override | Core works without credentials/cost. |
-| ADR-011 | Temporary private media and post-confirm deletion | Confirmed | Privacy and Free-tier capacity. |
-| ADR-012 | Online-only; no service worker/push | Confirmed override | Avoid offline/notification complexity. |
-| ADR-013 | Immediate irreversible account deletion | Confirmed override | Simple privacy-conscious lifecycle. |
-| ADR-014 | Best-effort backup/recovery | Confirmed override | Educational/cost priority; not production SLA. |
-| ADR-015 | GitHub CI; Darkube Git build with gradual deployment | Confirmed/verify | Simple learning workflow; platform triggers must be tested. |
+| ID      | Decision                                             | Class              | Rationale/implication                                              |
+| ------- | ---------------------------------------------------- | ------------------ | ------------------------------------------------------------------ |
+| ADR-001 | Modular monolith and boilerplate service boundaries  | Confirmed          | Lowest complexity; testable domain services.                       |
+| ADR-002 | Darkube web hosting; Supabase Free DB/storage        | Confirmed          | Near-zero cost; external latency/quotas and pause risk accepted.   |
+| ADR-003 | Better Auth embedded behind `IdentityService`        | Preferred/verify   | Avoid custom auth; requires compatibility/security spike.          |
+| ADR-004 | Public username/password and recovery code           | Confirmed          | No email dependency; loss of both credentials is unrecoverable.    |
+| ADR-005 | Server-only Prisma ownership; defer custom RLS       | Confirmed          | Straightforward MVP isolation; requires disciplined queries/tests. |
+| ADR-006 | `next-intl`, locale-prefixed routes                  | Confirmed          | Runtime bilingual RTL/LTR in one app.                              |
+| ADR-007 | Hybrid Server Actions/Route Handlers                 | Confirmed          | Aligns with Next.js and avoids unnecessary public API.             |
+| ADR-008 | Local versioned nutrition seed                       | Confirmed          | Deterministic, low-cost, Iran-focused; limited initial coverage.   |
+| ADR-009 | Optional PostgreSQL worker, no Redis                 | Confirmed          | Durable optional AI jobs with minimal infrastructure.              |
+| ADR-010 | Three AI features optional/feature-flagged           | Confirmed override | Core works without credentials/cost.                               |
+| ADR-011 | Temporary private media and post-confirm deletion    | Confirmed          | Privacy and Free-tier capacity.                                    |
+| ADR-012 | Online-only; no service worker/push                  | Confirmed override | Avoid offline/notification complexity.                             |
+| ADR-013 | Immediate irreversible account deletion              | Confirmed override | Simple privacy-conscious lifecycle.                                |
+| ADR-014 | Best-effort backup/recovery                          | Confirmed override | Educational/cost priority; not production SLA.                     |
+| ADR-015 | GitHub CI; Darkube Git build with gradual deployment | Confirmed/verify   | Simple learning workflow; platform triggers must be tested.        |
 
 ## 28. Technical risk register
 
-| Risk | Likelihood/impact | MVP mitigation | Future production |
-|---|---|---|---|
-| Supabase Free pause/quota exhaustion | Medium/High | usage warnings, temporary media, maintenance state | paid plan/alternative provider |
-| No guaranteed backup/PITR | Medium/High | best-effort export and local restore exercise; disclose | automated offsite backups/PITR |
-| Darkube↔Supabase latency/connectivity | Unknown/High | deployment spike; pool/timeouts; fail clearly | regional provider/private network |
-| Better Auth compatibility gap | Low–Medium/High | spike before domain implementation | pin/upgrade plan or owner-approved alternative |
-| Owner query omitted | Medium/Critical | service conventions, compound keys, adversarial tests | RLS defense in depth/security review |
-| Public registration abuse | Medium/Medium | basic persistent limits and validation | CAPTCHA/reputation/WAF/email verification |
-| Recovery code loss | Medium/High for user | prominent save/confirm/regenerate UX | verified recovery channel/passkeys |
-| AI privacy/cost/unreliability | Medium/Medium | disabled by default, consent, quotas, manual fallback | contracts/evaluation/monitoring |
-| Nutrition inaccuracies/coverage | Medium/Medium | sourced small catalog, provenance, manual correction | licensed broader dataset/review |
-| Job stuck/duplicate | Medium/Medium | leases, idempotency, retries, revision checks | dashboards/dead-letter operations |
-| Private media leak | Low/High | private buckets, server authorization, signed URLs, short retention | independent security test/malware scan |
-| Product/design source conflicts | High/Medium | explicit section 1.2 overrides and traceability | update source docs in separate approved task |
+| Risk                                  | Likelihood/impact    | MVP mitigation                                                      | Future production                              |
+| ------------------------------------- | -------------------- | ------------------------------------------------------------------- | ---------------------------------------------- |
+| Supabase Free pause/quota exhaustion  | Medium/High          | usage warnings, temporary media, maintenance state                  | paid plan/alternative provider                 |
+| No guaranteed backup/PITR             | Medium/High          | best-effort export and local restore exercise; disclose             | automated offsite backups/PITR                 |
+| Darkube↔Supabase latency/connectivity | Unknown/High         | deployment spike; pool/timeouts; fail clearly                       | regional provider/private network              |
+| Better Auth compatibility gap         | Low–Medium/High      | spike before domain implementation                                  | pin/upgrade plan or owner-approved alternative |
+| Owner query omitted                   | Medium/Critical      | service conventions, compound keys, adversarial tests               | RLS defense in depth/security review           |
+| Public registration abuse             | Medium/Medium        | basic persistent limits and validation                              | CAPTCHA/reputation/WAF/email verification      |
+| Recovery code loss                    | Medium/High for user | prominent save/confirm/regenerate UX                                | verified recovery channel/passkeys             |
+| AI privacy/cost/unreliability         | Medium/Medium        | disabled by default, consent, quotas, manual fallback               | contracts/evaluation/monitoring                |
+| Nutrition inaccuracies/coverage       | Medium/Medium        | sourced small catalog, provenance, manual correction                | licensed broader dataset/review                |
+| Job stuck/duplicate                   | Medium/Medium        | leases, idempotency, retries, revision checks                       | dashboards/dead-letter operations              |
+| Private media leak                    | Low/High             | private buckets, server authorization, signed URLs, short retention | independent security test/malware scan         |
+| Product/design source conflicts       | High/Medium          | explicit section 1.2 overrides and traceability                     | update source docs in separate approved task   |
 
 ## 29. Requirements traceability
 
-| Requirement/journey group | Technical owners | Primary verification |
-|---|---|---|
-| A01–A02, J01–J02 authentication/onboarding | Identity/Profile services, `next-intl` routes | bilingual E2E, recovery/security tests |
-| O06–O08, P01–P04, J03/J04/J13 | Plan service, immutable snapshots, timeline transaction | unit + DB integration + E2E |
-| M01–M05, J05–J10 | Meal/Nutrition/Day services | calculation/idempotency/revision tests |
-| T01/H01–H04 | summaries, reflections, weights | service + responsive E2E |
-| J14 localization | `next-intl`, date/digit utilities | key parity, RTL/LTR and round-trip tests |
-| J15/J16 reflections/consent | deterministic engine, optional AI jobs | no-consent/no-provider/failure tests |
-| J17 export | Export service, signed private download | ownership/expiry/E2E |
-| J18/S07 deletion | Account service, identity revocation, media cleanup | partial-failure and session tests |
-| J19 AI images | Media, Job, AI adapters, editable drafts | feature-disabled + mocked optional E2E |
-| J20 outages | error boundaries, retained drafts, fallbacks | injected network/provider failure tests |
-| Product acceptance 1–32 | corresponding services above | acceptance matrix maintained in test docs; AI availability clauses interpreted by section 1.2 |
+| Requirement/journey group                  | Technical owners                                        | Primary verification                                                                          |
+| ------------------------------------------ | ------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| A01–A02, J01–J02 authentication/onboarding | Identity/Profile services, `next-intl` routes           | bilingual E2E, recovery/security tests                                                        |
+| O06–O08, P01–P04, J03/J04/J13              | Plan service, immutable snapshots, timeline transaction | unit + DB integration + E2E                                                                   |
+| M01–M05, J05–J10                           | Meal/Nutrition/Day services                             | calculation/idempotency/revision tests                                                        |
+| T01/H01–H04                                | summaries, reflections, weights                         | service + responsive E2E                                                                      |
+| J14 localization                           | `next-intl`, date/digit utilities                       | key parity, RTL/LTR and round-trip tests                                                      |
+| J15/J16 reflections/consent                | deterministic engine, optional AI jobs                  | no-consent/no-provider/failure tests                                                          |
+| J17 export                                 | Export service, signed private download                 | ownership/expiry/E2E                                                                          |
+| J18/S07 deletion                           | Account service, identity revocation, media cleanup     | partial-failure and session tests                                                             |
+| J19 AI images                              | Media, Job, AI adapters, editable drafts                | feature-disabled + mocked optional E2E                                                        |
+| J20 outages                                | error boundaries, retained drafts, fallbacks            | injected network/provider failure tests                                                       |
+| Product acceptance 1–32                    | corresponding services above                            | acceptance matrix maintained in test docs; AI availability clauses interpreted by section 1.2 |
 
 ## 30. Implementation readiness checklist
 
@@ -832,19 +832,19 @@ Until a verification item passes, the specification describes the intended bound
 
 ## 33. Specification audit and gap closure
 
-| Area | Pre-audit state | Gap closed in 1.1-draft | Residual status |
-|---|---|---|---|
-| Governance/traceability | Partially covered | Added revision policy, glossary, audit record, stronger release traceability | Complete for MVP |
-| Architecture/deployment | Mostly complete | Added execution/trust-boundary paths and degraded behavior | Darkube capabilities require verification |
-| Repository/modules | Mostly complete | Added module ownership/public operations and transaction rules | Complete for MVP |
-| Data/database | Partially covered | Added entities, physical types, constraints, indexes, retention, plan rules, AI/throttle/idempotency/deletion records | Prisma SQL remains implementation work |
-| Auth/security/privacy | Mostly complete | Added security acceptance, persistent throttle schema, recovery/deletion precision and adversarial tests | Better Auth/Darkube proxy require verification |
-| Business rules | Mostly complete | Added portion, substitution, unsupported instruction, undo, freshness, export, and transaction contracts | Complete against approved scope |
-| AI | Mostly complete | Added analysis record, error taxonomy, result/privacy contract | Provider capability requires verification |
-| Jobs/storage | Mostly complete | Added claim/lease/recovery contract and storage security cases | Supabase signed-flow behavior requires verification |
-| Performance/capacity | Partially covered | Added educational planning envelope, resource/query budgets and scaling triggers | Measurements required during implementation |
-| Operations/quality | Mostly complete | Added concrete release evidence and blocking criteria | Darkube logs/rollback require verification |
-| Dependencies | Partially covered | Added required/optional inventory and compatibility/update policy | Exact versions chosen during foundation |
+| Area                    | Pre-audit state   | Gap closed in 1.1-draft                                                                                               | Residual status                                     |
+| ----------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Governance/traceability | Partially covered | Added revision policy, glossary, audit record, stronger release traceability                                          | Complete for MVP                                    |
+| Architecture/deployment | Mostly complete   | Added execution/trust-boundary paths and degraded behavior                                                            | Darkube capabilities require verification           |
+| Repository/modules      | Mostly complete   | Added module ownership/public operations and transaction rules                                                        | Complete for MVP                                    |
+| Data/database           | Partially covered | Added entities, physical types, constraints, indexes, retention, plan rules, AI/throttle/idempotency/deletion records | Prisma SQL remains implementation work              |
+| Auth/security/privacy   | Mostly complete   | Added security acceptance, persistent throttle schema, recovery/deletion precision and adversarial tests              | Better Auth/Darkube proxy require verification      |
+| Business rules          | Mostly complete   | Added portion, substitution, unsupported instruction, undo, freshness, export, and transaction contracts              | Complete against approved scope                     |
+| AI                      | Mostly complete   | Added analysis record, error taxonomy, result/privacy contract                                                        | Provider capability requires verification           |
+| Jobs/storage            | Mostly complete   | Added claim/lease/recovery contract and storage security cases                                                        | Supabase signed-flow behavior requires verification |
+| Performance/capacity    | Partially covered | Added educational planning envelope, resource/query budgets and scaling triggers                                      | Measurements required during implementation         |
+| Operations/quality      | Mostly complete   | Added concrete release evidence and blocking criteria                                                                 | Darkube logs/rollback require verification          |
+| Dependencies            | Partially covered | Added required/optional inventory and compatibility/update policy                                                     | Exact versions chosen during foundation             |
 
 No audit change alters an approved product or architecture decision. `product-spec.md` and `design-scope.md` remain unchanged; their known conflicts remain explicitly governed by section 1.2.
 

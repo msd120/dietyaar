@@ -86,24 +86,22 @@ function checkFile(filePath) {
 }
 
 function checkLayoutDefaults() {
-  const layoutPath = path.join(srcRoot, 'app', 'layout.tsx');
+  const layoutPath = path.join(srcRoot, 'app', '[locale]', 'layout.tsx');
   if (!fs.existsSync(layoutPath)) {
-    violations.push('src/app/layout.tsx:1 Missing root layout file.');
+    violations.push('src/app/[locale]/layout.tsx:1 Missing locale root layout file.');
     return;
   }
   const layoutContent = fs.readFileSync(layoutPath, 'utf8');
-  if (!layoutContent.includes('lang={locale.lang}')) {
-    violations.push(
-      'src/app/layout.tsx:1 Root <html> must use lang={locale.lang} from @/lib/locale.',
-    );
+  if (!layoutContent.includes('lang={locale}')) {
+    violations.push('src/app/[locale]/layout.tsx:1 Root <html> must use the route locale.');
   }
-  if (!layoutContent.includes('dir={locale.dir}')) {
-    violations.push(
-      'src/app/layout.tsx:1 Root <html> must use dir={locale.dir} from @/lib/locale.',
-    );
+  if (!layoutContent.includes('dir={direction}')) {
+    violations.push('src/app/[locale]/layout.tsx:1 Root <html> must use locale direction.');
   }
   if (!layoutContent.includes('<DirectionProvider')) {
-    violations.push('src/app/layout.tsx:1 Root layout must wrap the app in <DirectionProvider>.');
+    violations.push(
+      'src/app/[locale]/layout.tsx:1 Root layout must wrap the app in <DirectionProvider>.',
+    );
   }
 }
 

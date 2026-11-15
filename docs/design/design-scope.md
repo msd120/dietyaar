@@ -2,7 +2,7 @@
 
 Version: 1.2  
 Date: 2026-11-15  
-Status: Behavioral design scope complete; visual design pending; aligned with [product-spec.md](./product-spec.md)  
+Status: Behavioral design scope complete; visual design pending; aligned with [product-spec.md](./product-spec.md)
 
 This document is the design source of truth for user-facing information architecture, pages and sheets, screen-level data and actions, reusable UI states, user journeys, and responsive bilingual coverage. Product policy, eligibility, calculation rules, data contracts, safety boundaries, and acceptance criteria remain owned by [product-spec.md](../product/product-spec.md). Visual tokens, component styling, detailed layout direction, and final brand expression belong in [visual-design.md](./visual-design.md) or an approved Figma file. Until that source exists, neutral accessible temporary tokens are approved but do not constitute final visual design.
 
@@ -537,4 +537,3 @@ The design is complete only when it includes:
 - Content specifications for Persian and English system copy, including validation and fallback text; user-entered content may remain fixture data.
 - Prototype coverage for J01, J05, J09, J10, J13, J14, J16, both J19 image flows, and J20.
 - A traceability note from each frame or component to its page ID and relevant journey ID. Designs without these identifiers are not considered implementation-ready.
-

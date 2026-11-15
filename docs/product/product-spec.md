@@ -31,25 +31,25 @@ The application tracks an existing plan. It does not prescribe a diet, diagnose 
 
 These are confirmed MVP product decisions unless a row or later section explicitly identifies an open launch dependency.
 
-| Topic | MVP decision |
-|---|---|
-| Primary persona | Adult in Iran following a dietitian-provided, meal-based plan for weight loss |
-| Eligible users | Adults aged 18+ following an existing non-clinical plan for weight loss, maintenance, or weight gain |
-| Platform | Responsive web application; mobile-first; installable shell optional |
-| Launch locale | Iran-first; complete Persian RTL and English LTR interfaces |
-| Monetization | No billing or subscription flow in MVP |
-| Accounts | Email one-time-code authentication |
-| Plan entry | Manual structured entry and automatic extraction from one JPEG/PNG/WebP plan image are required; automatic plan extraction from pasted text is deferred |
-| Plan authorship | Optional metadata: dietitian, fitness coach, self, or unspecified; no verification or author account |
-| Supported plan formats | Meal-based, calorie/macro-target-based, custom with explicit meals/rules/targets, or a combination |
-| PDF plans | Deferred; tell users to enter the plan manually or upload a screenshot image |
-| Meal entry | Structured manual entry, manual nutrients, recent meals, saved meals, and required AI food recognition from a meal photo; standalone meal-text analysis is deferred |
-| Morning message | In-app daily card; optional web push with explicit opt-in |
-| Notification default | 08:00 in the user's selected IANA timezone; Asia/Tehran by default |
-| Nutrition | Energy, protein, carbohydrate, fat; fiber when available |
-| Units | Metric and imperial input; canonical grams, kilograms, and kcal |
-| AI provider | One configurable approved provider—DeepSeek, GapGPT, or AvalAI—used server-side for required meal-photo food recognition, plan-image extraction, and consent-based daily writing; the launch provider/model is selected after capability, privacy, latency, and cost validation |
-| Design ownership | [design-scope.md](../design/design-scope.md) owns information architecture, screens, states, and journeys; [visual-design.md](../design/visual-design.md) or approved Figma owns visual tokens, components, layout, and visual direction |
+| Topic                  | MVP decision                                                                                                                                                                                                                                                                    |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Primary persona        | Adult in Iran following a dietitian-provided, meal-based plan for weight loss                                                                                                                                                                                                   |
+| Eligible users         | Adults aged 18+ following an existing non-clinical plan for weight loss, maintenance, or weight gain                                                                                                                                                                            |
+| Platform               | Responsive web application; mobile-first; installable shell optional                                                                                                                                                                                                            |
+| Launch locale          | Iran-first; complete Persian RTL and English LTR interfaces                                                                                                                                                                                                                     |
+| Monetization           | No billing or subscription flow in MVP                                                                                                                                                                                                                                          |
+| Accounts               | Email one-time-code authentication                                                                                                                                                                                                                                              |
+| Plan entry             | Manual structured entry and automatic extraction from one JPEG/PNG/WebP plan image are required; automatic plan extraction from pasted text is deferred                                                                                                                         |
+| Plan authorship        | Optional metadata: dietitian, fitness coach, self, or unspecified; no verification or author account                                                                                                                                                                            |
+| Supported plan formats | Meal-based, calorie/macro-target-based, custom with explicit meals/rules/targets, or a combination                                                                                                                                                                              |
+| PDF plans              | Deferred; tell users to enter the plan manually or upload a screenshot image                                                                                                                                                                                                    |
+| Meal entry             | Structured manual entry, manual nutrients, recent meals, saved meals, and required AI food recognition from a meal photo; standalone meal-text analysis is deferred                                                                                                             |
+| Morning message        | In-app daily card; optional web push with explicit opt-in                                                                                                                                                                                                                       |
+| Notification default   | 08:00 in the user's selected IANA timezone; Asia/Tehran by default                                                                                                                                                                                                              |
+| Nutrition              | Energy, protein, carbohydrate, fat; fiber when available                                                                                                                                                                                                                        |
+| Units                  | Metric and imperial input; canonical grams, kilograms, and kcal                                                                                                                                                                                                                 |
+| AI provider            | One configurable approved provider—DeepSeek, GapGPT, or AvalAI—used server-side for required meal-photo food recognition, plan-image extraction, and consent-based daily writing; the launch provider/model is selected after capability, privacy, latency, and cost validation |
+| Design ownership       | [design-scope.md](../design/design-scope.md) owns information architecture, screens, states, and journeys; [visual-design.md](../design/visual-design.md) or approved Figma owns visual tokens, components, layout, and visual direction                                        |
 
 Development can begin with these defaults. Public release requires the launch decisions in section 20.
 
@@ -86,18 +86,18 @@ No open-ended AI chat is required. No social comparison or punitive gamification
 
 ## 5. Key definitions
 
-| Term | Definition |
-|---|---|
-| Plan version | Immutable snapshot of confirmed meals, targets, schedule, and effective dates |
-| Planned slot | A meal or snack expected on a particular local date |
-| Meal draft | Unconfirmed input and estimates; excluded from totals |
-| Confirmed meal | User-approved record included in calculations |
-| Logged intake | Sum of confirmed meal nutrients for the selected date |
-| Complete day | User explicitly states that all intake for that date has been recorded |
-| Partial day | Logging remains incomplete or is not explicitly closed |
-| Alignment | Comparison with confirmed plan rules; not a medical health rating |
-| Unknown nutrient | Missing value, stored as null; never silently converted to zero |
-| Estimate source | Nutrition database record, user label/manual value, or unknown |
+| Term               | Definition                                                                                                                                                         |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Plan version       | Immutable snapshot of confirmed meals, targets, schedule, and effective dates                                                                                      |
+| Planned slot       | A meal or snack expected on a particular local date                                                                                                                |
+| Meal draft         | Unconfirmed input and estimates; excluded from totals                                                                                                              |
+| Confirmed meal     | User-approved record included in calculations                                                                                                                      |
+| Logged intake      | Sum of confirmed meal nutrients for the selected date                                                                                                              |
+| Complete day       | User explicitly states that all intake for that date has been recorded                                                                                             |
+| Partial day        | Logging remains incomplete or is not explicitly closed                                                                                                             |
+| Alignment          | Comparison with confirmed plan rules; not a medical health rating                                                                                                  |
+| Unknown nutrient   | Missing value, stored as null; never silently converted to zero                                                                                                    |
+| Estimate source    | Nutrition database record, user label/manual value, or unknown                                                                                                     |
 | Morning reflection | A short daily check-in based on yesterday's available records and today's plan; AI-written with consent, otherwise produced from deterministic localized templates |
 
 ## 6. Onboarding
@@ -336,19 +336,19 @@ Delivery:
 
 These are implementation choices, not vendor capability claims. Resolve stable package versions at project initialization and commit a lockfile.
 
-| Layer | Proposed implementation |
-|---|---|
-| Frontend and API | Next.js App Router, React, TypeScript |
-| UI | Tailwind CSS with accessible headless components and shared design tokens |
-| Validation | Shared Zod schemas; server validation is authoritative |
-| Persistence | Managed PostgreSQL, proposed Supabase |
-| Authentication | Managed email OTP; proposed Supabase Auth |
-| Media | Private object storage; short-lived signed uploads/downloads |
-| Async processing | Durable database-backed jobs with scheduled worker execution |
-| AI integration | Server-only provider-neutral adapter with one configured provider: DeepSeek, GapGPT, or AvalAI |
-| Nutrition | Server-only adapter over a versioned dataset/provider |
-| Tests | Unit/integration tests and Playwright critical flows |
-| Hosting | Managed web deployment plus a worker runtime supporting job duration |
+| Layer            | Proposed implementation                                                                        |
+| ---------------- | ---------------------------------------------------------------------------------------------- |
+| Frontend and API | Next.js App Router, React, TypeScript                                                          |
+| UI               | Tailwind CSS with accessible headless components and shared design tokens                      |
+| Validation       | Shared Zod schemas; server validation is authoritative                                         |
+| Persistence      | Managed PostgreSQL, proposed Supabase                                                          |
+| Authentication   | Managed email OTP; proposed Supabase Auth                                                      |
+| Media            | Private object storage; short-lived signed uploads/downloads                                   |
+| Async processing | Durable database-backed jobs with scheduled worker execution                                   |
+| AI integration   | Server-only provider-neutral adapter with one configured provider: DeepSeek, GapGPT, or AvalAI |
+| Nutrition        | Server-only adapter over a versioned dataset/provider                                          |
+| Tests            | Unit/integration tests and Playwright critical flows                                           |
+| Hosting          | Managed web deployment plus a worker runtime supporting job duration                           |
 
 Use a modular monolith; microservices are unnecessary for MVP.
 
@@ -384,28 +384,28 @@ Rules:
 
 All user-owned records contain user_id, created_at, and updated_at where applicable; foreign keys must enforce owner consistency.
 
-| Entity | Essential fields |
-|---|---|
-| Profile | user_id, name?, age, goal, unit_system, timezone, locale |
-| Consent | purpose, policy_version, granted_at, revoked_at |
-| Preferences | theme, morning_time, push_enabled, weight_tracking_enabled |
-| DietPlanVersion | id, status, source_reference?, effective_from, effective_to?, original_text?, schema_version |
-| PlanDay | plan_version_id, weekday or daily-template marker |
-| PlanSlot | plan_day_id, label, preferred_time?, food_options, portion_rules |
-| PlanTarget | scope, nutrient, rule_type, lower?, upper?, exact?, unit, source_text |
-| Meal | id, consumed_at_utc, local_date, timezone_at_entry, plan_version_id?, slot_id?, status, revision |
-| MealItem | meal_id, name, grams?, household_quantity?, nutrients, source, source_id?, source_version?, preparation_notes?, portion_conversion?, user_overrides |
-| SavedMeal | id, name, item_snapshot, nutrient_snapshot, last_used_at?; edits never mutate confirmed meals created from it |
-| MediaAsset | owner, private_path, purpose, mime_type, byte_size, retention_deadline |
-| DayState | local_date, complete_at?, revision, reopened_at? |
+| Entity             | Essential fields                                                                                                                                                              |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Profile            | user_id, name?, age, goal, unit_system, timezone, locale                                                                                                                      |
+| Consent            | purpose, policy_version, granted_at, revoked_at                                                                                                                               |
+| Preferences        | theme, morning_time, push_enabled, weight_tracking_enabled                                                                                                                    |
+| DietPlanVersion    | id, status, source_reference?, effective_from, effective_to?, original_text?, schema_version                                                                                  |
+| PlanDay            | plan_version_id, weekday or daily-template marker                                                                                                                             |
+| PlanSlot           | plan_day_id, label, preferred_time?, food_options, portion_rules                                                                                                              |
+| PlanTarget         | scope, nutrient, rule_type, lower?, upper?, exact?, unit, source_text                                                                                                         |
+| Meal               | id, consumed_at_utc, local_date, timezone_at_entry, plan_version_id?, slot_id?, status, revision                                                                              |
+| MealItem           | meal_id, name, grams?, household_quantity?, nutrients, source, source_id?, source_version?, preparation_notes?, portion_conversion?, user_overrides                           |
+| SavedMeal          | id, name, item_snapshot, nutrient_snapshot, last_used_at?; edits never mutate confirmed meals created from it                                                                 |
+| MediaAsset         | owner, private_path, purpose, mime_type, byte_size, retention_deadline                                                                                                        |
+| DayState           | local_date, complete_at?, revision, reopened_at?                                                                                                                              |
 | PlanSlotOccurrence | local_date, plan_version_id, slot_id, explicit_state, state_changed_at, revision; persists explicit skipped state while recorded state is derived from linked confirmed meals |
-| DailySummary | local_date, source_revision, known_totals, unknown_counts, comparisons |
-| MorningReflection | id, local_date, body, source_revision, generated_at, generation_method, notification_status |
-| ReflectionFeedback | reflection_id, rating, submitted_at; one current `helpful` or `not_helpful` value per reflection and user |
-| Job | type, owner, idempotency_key, state, attempts, next_run_at, safe_error_code |
-| PushSubscription | endpoint and encrypted provider credentials |
-| WeightEntry | id, measured_at, local_date, weight_kg, revision |
-| AuditEvent | actor, action, entity_type, entity_id, timestamp, safe_metadata; no raw sensitive content |
+| DailySummary       | local_date, source_revision, known_totals, unknown_counts, comparisons                                                                                                        |
+| MorningReflection  | id, local_date, body, source_revision, generated_at, generation_method, notification_status                                                                                   |
+| ReflectionFeedback | reflection_id, rating, submitted_at; one current `helpful` or `not_helpful` value per reflection and user                                                                     |
+| Job                | type, owner, idempotency_key, state, attempts, next_run_at, safe_error_code                                                                                                   |
+| PushSubscription   | endpoint and encrypted provider credentials                                                                                                                                   |
+| WeightEntry        | id, measured_at, local_date, weight_kg, revision                                                                                                                              |
+| AuditEvent         | actor, action, entity_type, entity_id, timestamp, safe_metadata; no raw sensitive content                                                                                     |
 
 Nutrition object: energy_kcal, protein_g, carbohydrate_g, fat_g, fiber_g; each is a non-negative decimal or null.
 
@@ -425,37 +425,37 @@ Localization behavior: store canonical numeric values independently of display d
 
 Authenticated endpoints; all reads and writes enforce ownership. Return structured errors: code, safe message, field errors, retryable, request ID.
 
-| Route | Purpose |
-|---|---|
-| GET/PATCH /api/profile | Read/update basics and preferences |
-| POST /api/uploads | Validate metadata and issue private upload permission |
-| POST /api/plan-drafts | Create a manual or photo plan draft |
-| POST /api/plan-drafts/:id/analyze | Enqueue plan image extraction; pasted-text plan extraction is not supported in MVP |
-| PATCH /api/plan-drafts/:id | Correct a manual or conditionally extracted plan draft |
-| POST /api/plan-drafts/:id/activate | Validate and activate immutable version |
-| GET /api/plan?date=YYYY-MM-DD | Get applicable plan |
-| GET /api/plans/versions | List current, scheduled, and historical plan versions |
-| GET /api/plans/versions/:id | Read one owned immutable plan version |
-| POST /api/plans/corrections | Apply an audited past-date correction from a reviewed draft and recompute affected dates |
-| POST /api/meal-drafts | Create logging draft |
-| POST /api/meal-drafts/:id/analyze-photo | Enqueue required meal-photo food recognition and return an editable proposed result |
-| PATCH /api/meal-drafts/:id | Correct draft |
-| POST /api/meal-drafts/:id/confirm | Atomically create confirmed meal |
-| PATCH/DELETE /api/meals/:id | Revise/delete and invalidate summaries |
-| GET/POST /api/saved-meals | List/search saved meals or create a reusable snapshot |
-| GET/PATCH/DELETE /api/saved-meals/:id | Read, rename/revise, or delete a saved meal without mutating meal history |
-| POST /api/saved-meals/:id/use | Copy a saved meal into a new editable meal draft |
-| GET /api/days/:date | Meals, plan, totals, completeness, reflection |
-| PUT /api/days/:date/completeness | Explicitly complete or reopen day |
-| PUT /api/days/:date/slots/:slotId/state | Mark an applicable slot skipped or clear its explicit state using revision checks |
-| GET /api/history?from=&to= | Paginated date summaries |
-| GET/POST /api/weight-entries | List entries for a date range or create an entry |
-| PATCH/DELETE /api/weight-entries/:id | Revise or delete an owned weight entry |
-| PUT/DELETE /api/reflections/:id/feedback | Set helpful/not-helpful feedback or remove it |
-| GET /api/jobs/:id | Safe progress/result status |
-| POST/DELETE /api/push-subscriptions | Manage opt-in delivery |
-| POST /api/account/export | Produce private JSON/CSV export |
-| DELETE /api/account | Reauthenticate and initiate deletion |
+| Route                                    | Purpose                                                                                  |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------- |
+| GET/PATCH /api/profile                   | Read/update basics and preferences                                                       |
+| POST /api/uploads                        | Validate metadata and issue private upload permission                                    |
+| POST /api/plan-drafts                    | Create a manual or photo plan draft                                                      |
+| POST /api/plan-drafts/:id/analyze        | Enqueue plan image extraction; pasted-text plan extraction is not supported in MVP       |
+| PATCH /api/plan-drafts/:id               | Correct a manual or conditionally extracted plan draft                                   |
+| POST /api/plan-drafts/:id/activate       | Validate and activate immutable version                                                  |
+| GET /api/plan?date=YYYY-MM-DD            | Get applicable plan                                                                      |
+| GET /api/plans/versions                  | List current, scheduled, and historical plan versions                                    |
+| GET /api/plans/versions/:id              | Read one owned immutable plan version                                                    |
+| POST /api/plans/corrections              | Apply an audited past-date correction from a reviewed draft and recompute affected dates |
+| POST /api/meal-drafts                    | Create logging draft                                                                     |
+| POST /api/meal-drafts/:id/analyze-photo  | Enqueue required meal-photo food recognition and return an editable proposed result      |
+| PATCH /api/meal-drafts/:id               | Correct draft                                                                            |
+| POST /api/meal-drafts/:id/confirm        | Atomically create confirmed meal                                                         |
+| PATCH/DELETE /api/meals/:id              | Revise/delete and invalidate summaries                                                   |
+| GET/POST /api/saved-meals                | List/search saved meals or create a reusable snapshot                                    |
+| GET/PATCH/DELETE /api/saved-meals/:id    | Read, rename/revise, or delete a saved meal without mutating meal history                |
+| POST /api/saved-meals/:id/use            | Copy a saved meal into a new editable meal draft                                         |
+| GET /api/days/:date                      | Meals, plan, totals, completeness, reflection                                            |
+| PUT /api/days/:date/completeness         | Explicitly complete or reopen day                                                        |
+| PUT /api/days/:date/slots/:slotId/state  | Mark an applicable slot skipped or clear its explicit state using revision checks        |
+| GET /api/history?from=&to=               | Paginated date summaries                                                                 |
+| GET/POST /api/weight-entries             | List entries for a date range or create an entry                                         |
+| PATCH/DELETE /api/weight-entries/:id     | Revise or delete an owned weight entry                                                   |
+| PUT/DELETE /api/reflections/:id/feedback | Set helpful/not-helpful feedback or remove it                                            |
+| GET /api/jobs/:id                        | Safe progress/result status                                                              |
+| POST/DELETE /api/push-subscriptions      | Manage opt-in delivery                                                                   |
+| POST /api/account/export                 | Produce private JSON/CSV export                                                          |
+| DELETE /api/account                      | Reauthenticate and initiate deletion                                                     |
 
 Plan-image draft states: editing → queued → analyzing → ready_for_review → activated. Meal-photo drafts use editing → uploading → queued → recognizing → ready_for_review → confirmed. A failed job returns to an editable draft with Retry and Manual entry. A canceled or superseded job cannot overwrite a newer revision. Activation and meal confirmation require the draft's current revision and an idempotency key.
 
@@ -583,4 +583,3 @@ Implement the manual vertical slice before AI. Use this document as the product 
 The detailed information architecture, page and sheet inventory, screen-level data and actions, shared UI states, required user journeys, bilingual layout requirements, and design coverage checklist are maintained in [design-scope.md](../design/design-scope.md).
 
 This product specification remains the source of truth for product purpose, eligibility, behavior, data rules, safety boundaries, and acceptance criteria. The design scope must remain consistent with those requirements. Manual onboarding, plan entry, meal entry, review, and correction, plan-image extraction, and AI meal-photo food recognition are required. Automatic plan-text extraction and standalone meal-description-text analysis are deferred.
-
