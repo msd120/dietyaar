@@ -21,6 +21,8 @@ RUN apt-get -o Acquire::Check-Valid-Until=false update -y \
 # ─── Builder ──────────────────────────────────────────────────────────────
 FROM base AS builder
 
+ARG BETTER_AUTH_SECRET
+
 COPY package.json package-lock.json .npmrc ./
 RUN --mount=type=cache,target=/root/.npm \
     npm ci --prefer-offline --no-audit --no-fund
@@ -29,7 +31,8 @@ COPY . .
 RUN npx prisma generate
 
 # `next build` evaluates src/lib/env.ts; a syntactically valid placeholder is enough.
-ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
+ENV DATABASE_URL="postgresql://build:build@localhost:5432/build" \
+    BETTER_AUTH_SECRET=$BETTER_AUTH_SECRET
 RUN npm run build
 
 # Prisma CLI for `migrate deploy` at container start, installed on its own so

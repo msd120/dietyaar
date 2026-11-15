@@ -12,6 +12,8 @@ concurrency:
 env:
   NEXT_TELEMETRY_DISABLED: 1
   DATABASE_URL: postgresql://build:build@localhost:5432/build
+  # Synthetic build-only value. Production deployments must provide their own secret.
+  BETTER_AUTH_SECRET: ci-only-build-secret-not-for-production
 
 jobs:
   quality:
@@ -73,3 +75,5 @@ jobs:
           context: .
           push: false
           tags: dietyaar:ci
+          build-args: |
+            BETTER_AUTH_SECRET=${{ env.BETTER_AUTH_SECRET }}
