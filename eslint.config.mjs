@@ -32,6 +32,11 @@ const NO_SERVICES = {
   message:
     'Only server files (page.tsx, layout.tsx, route.ts) may call services. Client components use server actions.',
 };
+const NO_SERVER_CONFIG = {
+  group: ['@/lib/env', '@/providers/*'],
+  message:
+    'Client-facing code cannot import server environment values or provider implementations.',
+};
 
 /** Route-segment files Next.js always renders on the server. */
 const SERVER_ROUTE_FILES =
@@ -61,9 +66,13 @@ const eslintConfig = defineConfig([
   },
 
   // Shared components: no Prisma, no services (they get data via props or actions).
-  layer(['src/components/**/*.{ts,tsx}'], [NO_PRISMA, NO_SERVICES]),
+  layer(['src/components/**/*.{ts,tsx}'], [NO_PRISMA, NO_SERVICES, NO_SERVER_CONFIG]),
   // Client islands inside app/ (anything that is not a route-segment file): same rule.
-  layer(['src/app/**/*.{ts,tsx}'], [NO_PRISMA, NO_SERVICES], [SERVER_ROUTE_FILES]),
+  layer(
+    ['src/app/**/*.{ts,tsx}'],
+    [NO_PRISMA, NO_SERVICES, NO_SERVER_CONFIG],
+    [SERVER_ROUTE_FILES],
+  ),
   // Server route files may read through services, but never through Prisma directly.
   // (The health route is the one sanctioned exception: it pings the DB.)
   layer([SERVER_ROUTE_FILES], [NO_PRISMA], ['src/app/api/health/route.ts']),
@@ -89,6 +98,41 @@ const eslintConfig = defineConfig([
       {
         group: ['@/lib/prisma'],
         message: 'Actions call services, not Prisma. Put the query in src/services.',
+      },
+      NO_SERVER_CONFIG,
+    ],
+  ),
+  // domain/ → pure rules only: no framework, persistence, providers, locale or clock reads.
+  layer(
+    ['src/domain/**/*.ts'],
+    [
+      {
+        group: [
+          'next',
+          'next/*',
+          'react',
+          'react-dom',
+          '@prisma/client',
+          '@/lib/prisma',
+          '@/lib/env',
+          '@/providers/*',
+          '@/services/*',
+          '@/actions/*',
+          '@/components/*',
+          '@/app/*',
+        ],
+        message:
+          'Domain code is pure and cannot depend on frameworks, I/O, locale, clock, or data providers.',
+      },
+    ],
+  ),
+  // providers/ are server adapters and cannot depend on transport or UI layers.
+  layer(
+    ['src/providers/**/*.ts'],
+    [
+      {
+        group: ['@/components/*', '@/actions/*', '@/app/*', 'react', 'react-dom'],
+        message: 'Provider adapters are server-only and independent from UI and transport layers.',
       },
     ],
   ),

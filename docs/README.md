@@ -10,4 +10,10 @@
 | Engineering   | [Technical specification](engineering/technical-spec.md) | Architecture, data, security, delivery, and implementation sequence     |
 | Decisions     | [Architecture decisions](decisions/README.md)            | Adopted choices, upstream inheritance, and divergences                  |
 
+Implementation evidence and operating notes:
+
+- [Compatibility baseline](engineering/compatibility-report.md)
+- [Database migrations](engineering/database-migrations.md)
+- [Configuration and security boundaries](engineering/configuration-security.md)
+
 The technical specification section 1.2 defines precedence when documents conflict. ADRs 001 through 007 are inherited upstream context; ADR-008 records what Dietyaar retains or supersedes.

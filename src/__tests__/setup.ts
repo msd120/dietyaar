@@ -13,6 +13,11 @@ vi.mock('@/lib/env', () => ({
     SKIP_AUTH: false,
     LOG_LEVEL: 'silent',
     PRISMA_LOG_QUERIES: false,
+    MEDIA_STORAGE_ENABLED: false,
+    WORKER_ENABLED: false,
+    AI_PLAN_IMAGE_ENABLED: false,
+    AI_MEAL_PHOTO_ENABLED: false,
+    AI_REFLECTION_ENABLED: false,
   },
 }));
 

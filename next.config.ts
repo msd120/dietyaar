@@ -1,16 +1,8 @@
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
+import { securityHeaders } from './src/lib/security-headers';
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
-
-const securityHeaders = [
-  { key: 'X-Content-Type-Options', value: 'nosniff' },
-  { key: 'X-Frame-Options', value: 'DENY' },
-  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=()' },
-  // Browsers ignore HSTS over plain HTTP, so it is safe to send in development too.
-  { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains' },
-];
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
@@ -35,7 +27,7 @@ const nextConfig: NextConfig = {
   // Next.js already sets immutable Cache-Control on /_next/static and /_next/image;
   // only security headers are added here.
   async headers() {
-    return [{ source: '/(.*)', headers: securityHeaders }];
+    return [{ source: '/(.*)', headers: [...securityHeaders] }];
   },
 };
 
