@@ -1,9 +1,13 @@
 # Product Specification — Diet Progress Companion
 
-Version: 1.2  
-Date: 2026-11-15  
-Status: Product-ready MVP baseline for technical specification; explicit launch dependencies remain open.  
-Product languages: Persian and English; Persian is the default UI language. The specification remains in English.  
+Version: 1.3
+
+Date: 2026-11-16
+
+Status: Product-ready MVP baseline for technical specification; explicit launch dependencies remain open.
+
+Product languages: Persian and English; Persian is the default UI language. The specification remains in English.
+
 Deliverable scope: Product behavior, technical definitions, implementation requirements, and acceptance criteria. This document does not implement the application.
 
 ## Revision 1.1 resolved decisions
@@ -13,11 +17,17 @@ Deliverable scope: Product behavior, technical definitions, implementation requi
 - Manual plan entry and plan-image extraction ship in MVP; pasted-text plan extraction is deferred.
 - Meal logging uses structured manual entry, saved/recent meals, nutrition-dataset lookup, and manual nutrient values. The former deferral of meal-photo analysis is superseded by Revision 1.2; standalone meal-text analysis remains deferred.
 - AI consent originally covered plan-image extraction and AI-written morning check-ins. Revision 1.2 adds meal-photo food recognition as a third separately disclosed purpose. Without consent, manual flows remain available and morning check-ins use deterministic localized templates.
-- Age is collected once during eligibility; height, weight, sex, and gender are not required for onboarding. Weight tracking is separately opt-in.
+- Age is collected once during eligibility. Optional profile height, profile weight, gender, and birth year are offered during onboarding and may all be skipped. Profile weight does not enable weight tracking or create a weight-history entry.
 
 ## Revision 1.2 resolved decision
 
 - AI food recognition from a meal photo is required in the MVP. The server uses one configurable approved provider—DeepSeek, GapGPT, or AvalAI—behind a provider-neutral adapter. Recognition produces an editable draft only; nutrition values still come from the nutrition dataset or explicit user input, plan matching remains deterministic or user-confirmed, and nothing affects totals or comparisons before user confirmation.
+
+## Revision 1.3 resolved decision
+
+- Onboarding offers four genuinely optional profile attributes: height, weight, gender, and birth year. A user may provide any subset or skip all four without losing access to onboarding or any manual MVP journey.
+- Age remains the authoritative adult-eligibility input. Optional birth year is profile information only and does not silently replace, derive, or overwrite the eligibility decision.
+- Optional onboarding weight is a nullable profile measurement, not a `WeightEntry`. It neither enables weight tracking nor creates history; creating the first tracked weight always requires a later explicit user action.
 
 ## 1. Product purpose
 
@@ -106,7 +116,7 @@ Use a short sequence of focused screens with progress, Back, automatic server-si
 
 1. **Welcome:** Explain the purpose and that food estimates require review.
 2. **Eligibility and consent:** Email code; age required for eligibility; privacy notice; and one optional, withdrawable AI-processing consent that separately describes its three purposes: sending a user-selected plan image for extraction, sending a user-selected meal photo for food recognition, and sending an allowlisted structured daily summary for AI-written morning check-ins. Declining consent disables both image features and uses deterministic morning check-ins, while all manual plan and meal flows remain available. Allow the user to switch between Persian and English during onboarding and remember the choice.
-3. **Basics:** Preferred name optional; preferred unit system; Back/Edit eligibility link. Do not collect age again. Do not collect height, weight, sex, or gender during onboarding.
+3. **Basics and optional personal information:** Preferred name optional; preferred unit system; optional height, weight, gender, and birth year; Back/Edit eligibility link. Do not collect age again. Label each personal attribute optional and provide an unpressured Skip or Continue action.
 4. **Context:** Goal of losing, maintaining, or gaining weight; optional plan authorship metadata; optional dietary preferences and allergies. Avoid collecting full medical histories.
 5. **Plan:** Enter the existing diet manually or photograph/upload an image of it. Pasted-text extraction is not available.
 6. **Review:** Correct parsed days, meal slots, portions, alternatives, and numeric targets.
@@ -115,9 +125,12 @@ Use a short sequence of focused screens with progress, Back, automatic server-si
 
 Requirements:
 
-- Age is collected without requiring a date of birth. Under-18 users cannot activate this MVP.
-- Weight tracking is opt-in and is not required for onboarding, meal logging, plan activation, or comparison. Request the first weight only after the user explicitly enables tracking.
-- Weight input is positive, unit-labeled, and protected against accidental unit conversion; unusual values receive a clarification prompt, not a clinical judgment.
+- Age is collected without requiring a date of birth and remains the authoritative eligibility value. Under-18 users cannot activate this MVP.
+- Birth year is optional and does not require a full birth date. Persian UI defaults to a Jalali year experience and Persian numerals; English UI defaults to a Gregorian year experience. Persist the integer year together with its `jalali` or `gregorian` calendar, because a year without month/day cannot be losslessly converted between calendars. A locale switch preserves and labels the original calendar/value rather than silently converting it. If an entered birth year is future/invalid or materially conflicts with the eligibility age after allowing for year-only uncertainty, ask the user to correct or skip it; never silently change eligibility.
+- Optional profile height and weight accept the user's selected metric or imperial presentation and persist canonical centimeters and kilograms. Entered measurements must be positive and unit-labeled; invalid values receive field feedback, while unusual but possible values receive a clarification prompt rather than a clinical judgment. Exact validation thresholds are an implementation validation policy and must not be presented as health guidance.
+- Gender is optional and supports respectful inclusive choices: woman, man, non-binary, self-described, and prefer not to say. Self-described text is optional, bounded free text. Localized labels may be copy-reviewed without changing the canonical values.
+- All four attributes are private, owner-scoped, editable later, preserved across Back/refresh/resume, and nullable. Missing values do not produce validation errors or block completion.
+- Weight tracking remains separately opt-in and is not required for onboarding, meal logging, plan activation, or comparison. Onboarding profile weight does not enable tracking and does not create a `WeightEntry`. After the user explicitly enables tracking, the product may offer the profile weight as a prefill, but creates the first history entry only after separate confirmation.
 - Users may save onboarding without a plan, but alignment remains unavailable until a plan is activated.
 - Users may also finish onboarding, enter Today, and manually log meals without an active plan. Today shows logged meals and a prominent Add a plan action; plan matching and numeric plan comparisons remain unavailable until an eligible plan is activated.
 - An ineligible clinical plan may be retained only as an inactive draft if permitted by the data-retention policy; it cannot activate or enable comparisons.
@@ -126,7 +139,7 @@ Requirements:
 - Numeric inputs accept Persian, Arabic-Indic, and Latin digits and normalize them before validation and storage.
 - The Persian interface displays Persian numerals and Solar Hijri dates. The English interface displays localized LTR dates. API and persistence contracts continue to use Gregorian ISO dates and UTC instants where specified.
 - Default the timezone to Asia/Tehran. Users can confirm or change it during onboarding.
-- Do not collect height or sex/gender in MVP. No BMR/TDEE or other nutrition target is generated from profile or weight data.
+- Do not use height, profile weight, gender, birth year, or tracked weight to generate BMR/TDEE, nutrition targets, plan changes, or eligibility decisions. Do not infer sex from gender.
 - Plan import does not activate a plan until the user confirms it.
 - If the user identifies the plan as prescribed to manage a medical condition, prevent activation and explain the MVP limitation. A dietitian-authored general weight-management plan remains eligible. If the user indicates pregnancy/breastfeeding or requests condition-specific nutrition advice, avoid clinical coaching and do not collect detailed diagnoses.
 
@@ -386,7 +399,7 @@ All user-owned records contain user_id, created_at, and updated_at where applica
 
 | Entity             | Essential fields                                                                                                                                                              |
 | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Profile            | user_id, name?, age, goal, unit_system, timezone, locale                                                                                                                      |
+| Profile            | user_id, name?, age, goal, unit_system, timezone, locale, height_cm?, profile_weight_kg?, gender?, gender_self_description?, birth_year?, birth_year_calendar?                |
 | Consent            | purpose, policy_version, granted_at, revoked_at                                                                                                                               |
 | Preferences        | theme, morning_time, push_enabled, weight_tracking_enabled                                                                                                                    |
 | DietPlanVersion    | id, status, source_reference?, effective_from, effective_to?, original_text?, schema_version                                                                                  |
@@ -523,12 +536,27 @@ Measured on representative mid-range mobile devices and a normal 4G connection:
 24. A user without active AI-processing consent receives no AI request and still receives a deterministic localized morning check-in containing only supported server-calculated facts.
 25. A first plan defaults to today, a replacement defaults to tomorrow, and any user-selected override cannot activate until the version timeline has no unresolved overlap.
 26. Using a saved meal creates an independent editable draft; editing or deleting the saved meal never changes confirmed meal history.
-27. Weight entries support create, read, edit, and delete with unit-safe canonical storage and no effect on plan targets.
+27. Weight entries support create, read, edit, and delete with unit-safe canonical storage and no effect on plan targets. Optional profile weight remains separate and never creates or changes a weight entry without explicit confirmation.
 28. A skipped planned slot persists separately from not recorded, clears when a meal is linked, and does not silently return after that meal is removed.
 29. Helpful/not-helpful reflection feedback is optional, idempotent, contains no free text, and can be changed or removed.
 30. Plan-version history is owner-isolated, and a past-date correction is audited, overlap-safe, immutable, and recomputes only affected summaries.
-31. Onboarding and core use collect no height, sex/gender, or weight; weight is requested only after explicit tracking opt-in and disabling tracking hides weight UI without deleting existing entries.
+31. Onboarding offers optional height, profile weight, gender, and birth year. A user can enter all, some, or none; valid values survive Back, refresh, and resume and remain editable in Profile. Invalid entered values receive localized feedback. Persian/Jalali and English/Gregorian birth-year entry persist an integer plus its calendar, survive locale switches without fabricated precision, and do not replace the separate age-eligibility decision. Profile weight does not enable tracking or create a `WeightEntry`; users who omit all four fields can complete every manual MVP journey. Export and deletion include these nullable profile attributes.
 32. Meal-photo recognition is available through the configured approved AI provider; all recognized foods, portions, and assumptions are editable, no AI output affects totals or plan comparison before meal confirmation, and nutrients retain database/manual/unknown provenance rather than AI provenance.
+
+#### Optional personal-information acceptance scenarios
+
+These scenarios refine acceptance scenario 31 without changing the numbering above:
+
+1. A user enters valid height, profile weight, gender, and birth year and completes onboarding.
+2. A user skips all four and completes onboarding and every manual MVP journey.
+3. A user enters any subset and leaves the remaining fields null without errors.
+4. A user edits or clears previously entered values in resumed onboarding and Profile settings.
+5. Back, refresh, sign-out/return, and onboarding resume preserve partially entered valid values.
+6. Invalid entered values receive localized field feedback; clearing or skipping the optional field remains available.
+7. Persian/Jalali and English/Gregorian birth-year input validate consistently, store the tagged year/calendar without a full date, and survive locale switching without silent lossy conversion.
+8. Saving profile weight does not set `weight_tracking_enabled` or create a `WeightEntry`.
+9. Missing optional personal information never blocks plan creation, manual meal logging, Today, history, or Settings.
+10. Export contains the nullable profile attributes and birth-year calendar tag separately from tracked weights; account deletion removes both profile attributes and weight history.
 
 Testing: deterministic scoring and date unit tests; database/authorization integration tests; mocked AI contract and failure tests; end-to-end onboarding, plan activation, meal-photo recognition and confirmation, daily reflection, and account lifecycle tests. Use curated Persian, English, and mixed-language evaluation sets for both plan images and representative Iranian meal photos, including multiple foods, household portions, low image quality, and ambiguous preparation; record correction, unresolved-field, and failure rates before public launch.
 

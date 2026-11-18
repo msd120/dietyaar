@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 
 # ─── Base ─────────────────────────────────────────────────────────────────
-FROM node:lts-slim AS base
+FROM node:24.22.1-slim AS base
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1 \
     npm_config_fetch_retries=5 \

@@ -1,0 +1,2 @@
+-- FND-02 establishes reviewed, forward-only migration history.
+-- Product and identity tables are intentionally introduced by their owning tasks.

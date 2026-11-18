@@ -1,13 +1,16 @@
 # Dietyaar — Technical Specification
 
-Version: 1.0-draft  
-Date: 2026-11-15  
-Status: Implementation-ready baseline for an educational MVP; external capabilities marked **Requires Verification** remain non-final  
+Version: 1.2-draft
+
+Date: 2026-11-16
+
+Status: Implementation-ready baseline for an educational MVP; external capabilities marked **Requires Verification** remain non-final
+
 Audience: project owner, developers, reviewers, and AI coding agents
 
 ## Executive summary
 
-Dietyaar is a Persian-first, bilingual, mobile-first diet-progress companion. This specification converts [product-spec.md](./product-spec.md) and [design-scope.md](./design-scope.md) into an implementation blueprint while recording later owner-approved clarifications without modifying those source documents.
+Dietyaar is a Persian-first, bilingual, mobile-first diet-progress companion. This specification converts [product-spec.md](../product/product-spec.md) and [design-scope.md](../design/design-scope.md) into an implementation blueprint while recording later owner-approved clarifications without modifying those source documents.
 
 The application is a modular monolith based on `mhp-nextjs-boilerplate`: Next.js App Router, React, TypeScript, Tailwind, locally owned shadcn/Radix primitives, Zod, Prisma, PostgreSQL, Vitest, Playwright, Docker, and GitHub Actions. The boilerplate's service-layer and lint-enforced boundaries are retained. Its single-locale model, username/password implementation, admin-oriented user model, and single-process deployment assumptions are replaced or extended.
 
@@ -21,6 +24,7 @@ The design optimizes for learning, near-zero infrastructure cost, and safe funda
 | --------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1.0-draft | 2026-11-15 | Initial implementation-ready educational-MVP baseline assembled from product/design sources and owner clarifications.                                                                                                   |
 | 1.1-draft | 2026-11-15 | Specification audit: expanded logical database contracts, module boundaries, execution paths, security/job/AI contracts, capacity assumptions, dependency inventory, and release evidence. No product decision changed. |
+| 1.2-draft | 2026-11-16 | Owner-approved optional onboarding height, profile weight, gender, and birth year; preserved separate age eligibility and explicit weight-tracking consent.                                                             |
 
 Document changes require a pull request. A change that alters product behavior, privacy, cost, provider commitment, data retention, or an approved ADR requires owner approval. Pure clarification that preserves behavior may be reviewed as an engineering change. When source documents disagree, section 1 governs and the conflict must remain visible until the source is separately updated.
 
@@ -64,6 +68,7 @@ Authentication pages and journeys A01/A02/J01 must be implemented with equivalen
 
 - Public username/password registration, login, logout, sessions, recovery codes, and immediate account deletion.
 - Resumable onboarding, adult eligibility, consent, locale, timezone, goal, and optional weight tracking.
+- Optional owner-private onboarding profile height, profile weight, gender, and birth year; all nullable and independent of core access.
 - Manual structured diet-plan entry, review, activation, immutable versions, replacements, and historical corrections.
 - Structured meal drafts, curated-food lookup, user-created foods, manual nutrients, saved/recent meals, confirmation, edit, delete, and deterministic totals.
 - Today, seven-day history, plan, settings, export, deterministic in-app reflection, and weight history.
@@ -303,9 +308,13 @@ Prisma names are illustrative; migrations are the physical source after implemen
 
 - Better Auth tables (`User`, `Session`, `Account`, `Verification`) as generated/approved.
 - `RecoveryCredential(userId unique, codeHash, generation, createdAt, consumedAt?)`.
-- `Profile(userId PK/FK, preferredName?, age, goal, unitSystem, timezone, locale, onboardingStep, onboardingCompleteAt?, createdAt, updatedAt)`.
+- `Profile(userId PK/FK, preferredName?, age, goal, unitSystem, timezone, locale, heightCm? Decimal, profileWeightKg? Decimal, gender? enum, genderSelfDescription?, birthYear? Int, birthYearCalendar? enum, onboardingStep, onboardingCompleteAt?, createdAt, updatedAt)`.
 - `Consent(id, userId, purpose, policyVersion, grantedAt, revokedAt?)`; purposes separately represent plan image, meal image, and AI reflection even if one screen collects them.
 - `Preferences(userId PK, theme, morningTime, weightTrackingEnabled)`; no active push fields in MVP.
+- `age` remains the required adult-eligibility value. Optional `birthYear` and `birthYearCalendar` (`jalali` or `gregorian`) form one nullable pair displayed/entered through locale-appropriate controls; one cannot be present without the other. Because year-only values cannot be losslessly converted between calendars, locale switching preserves and labels the stored pair rather than silently converting it. Birth year never derives or overwrites `age` or eligibility.
+- `heightCm` and `profileWeightKg` are nullable canonical measurements. Accept metric or imperial presentation, normalize digits and units before validation, require positive entered values, and use bounded implementation validation plus an unusual-value clarification prompt without clinical judgment.
+- `gender` canonical values are `woman`, `man`, `non_binary`, `self_described`, and `prefer_not_to_say`; the whole field remains nullable. Store bounded self-description only with `self_described`. Do not infer sex or calculations from gender.
+- `profileWeightKg` is not a `WeightEntry`, does not set `weightTrackingEnabled`, and does not participate in trends. After explicit tracking opt-in it may prefill—but never auto-submit—the first `WeightEntry` form. Profile edits never rewrite history.
 
 ### 9.2 Plans
 
@@ -356,8 +365,9 @@ All identifiers are CUID/UUID strings consistently generated server-side. All ti
 
 Required constraints include:
 
-- `Profile.age >= 18` and enum/check constraints for goal, locale, unit system, states, nutrient/rule types, and generation methods.
-- Nutrients, grams, servings, weights, byte sizes, attempts, and quotas are non-negative; exact/min/max/range rules have valid bound combinations and `lower <= upper`.
+- `Profile.age >= 18` and enum/check constraints for goal, locale, unit system, optional gender, states, nutrient/rule types, and generation methods.
+- Optional `heightCm` and `profileWeightKg` must normalize to finite, positive values representable by their Decimal columns; nonnumeric, nonpositive, or overflow values are rejected, while unusual positive values receive confirmation rather than a clinical error. Optional birth year must be an integer valid in its tagged calendar and not in that calendar's future; missing year/calendar is valid only when both are null. A year-only consistency check accounts for calendar boundaries and unknown birthday before asking the user to correct or skip. No month/day is collected and no lossy calendar conversion is persisted.
+- Nutrients, grams, servings, tracked weights, byte sizes, attempts, and quotas are non-negative; exact/min/max/range rules have valid bound combinations and `lower <= upper`.
 - `effectiveTo IS NULL OR effectiveTo >= effectiveFrom`; only one applicable plan per user/date, enforced transactionally and preferably with a PostgreSQL exclusion constraint after compatibility testing.
 - Unique `(userId, localDate)` for day/summary/reflection, unique slot occurrence key, unique catalog `(versionId, normalizedNameFa)`, and unique normalized username in Better Auth's user identity.
 - Confirmed meal items require a frozen `sourceType` and `snapshotBasis`; catalog/user-food foreign keys may be nullable so historic snapshots survive source deletion.
@@ -589,7 +599,7 @@ Immediate account deletion:
 
 1. Require current password reauthentication and explicit irreversible confirmation.
 2. Mark account deleting and revoke sessions before cleanup.
-3. Delete/cascade plans, meals, weights, custom foods, reflections, preferences, consents, jobs/results, recovery credential, and identity in a controlled transaction/order.
+3. Delete/cascade the profile (including optional height, profile weight, gender, self-description, and birth year), plans, meals, tracked weights, custom foods, reflections, preferences, consents, jobs/results, recovery credential, and identity in a controlled transaction/order.
 4. Delete owned storage objects; persist minimal non-identifying cleanup tombstone/job only if deletion must retry.
 5. Sign out and deny all further access.
 
@@ -636,10 +646,10 @@ These are sizing assumptions for design/testing, not guarantees: tens of concurr
 
 ### 23.1 Test layers
 
-- **Unit:** nutrition scaling/null propagation, alignment tables, plan timeline, local dates/timezones, Persian normalization, reflection templates, state transitions, recovery token helpers, and AI schema parsing.
+- **Unit:** nutrition scaling/null propagation, alignment tables, plan timeline, local dates/timezones, Persian normalization, optional measurement normalization, tagged Jalali/Gregorian birth-year validation and locale preservation, reflection templates, state transitions, recovery token helpers, and AI schema parsing.
 - **Service integration:** real isolated PostgreSQL for migrations, transactions, uniqueness, idempotency, optimistic revision, cascades, job claims, and owner isolation.
 - **Provider contract:** mocked Better Auth/Storage/AI plus explicitly configured staging tests for signed private storage and live AI experiments.
-- **E2E:** registration/recovery-code acknowledgement, login, onboarding resume, manual plan activation, manual meal confirmation, Today/history, language switch, weight opt-in, export, and immediate account deletion in Persian and English.
+- **E2E:** registration/recovery-code acknowledgement, login, onboarding with all/some/no optional personal attributes, onboarding resume, invalid optional values, manual plan activation, manual meal confirmation, Today/history, language switch, explicit weight opt-in, export, and immediate account deletion in Persian and English.
 - **Optional AI E2E:** feature-enabled plan and meal image flows with fixtures and deterministic provider mocks; live evaluation is manual/gated.
 - **Accessibility/responsive:** keyboard, focus return, announcements, contrast, reduced motion, 320 px/mobile/desktop, RTL/LTR.
 
@@ -734,23 +744,24 @@ Do not begin optional AI work before the manual vertical slice passes end to end
 
 ## 27. Architecture decision register
 
-| ID      | Decision                                             | Class              | Rationale/implication                                              |
-| ------- | ---------------------------------------------------- | ------------------ | ------------------------------------------------------------------ |
-| ADR-001 | Modular monolith and boilerplate service boundaries  | Confirmed          | Lowest complexity; testable domain services.                       |
-| ADR-002 | Darkube web hosting; Supabase Free DB/storage        | Confirmed          | Near-zero cost; external latency/quotas and pause risk accepted.   |
-| ADR-003 | Better Auth embedded behind `IdentityService`        | Preferred/verify   | Avoid custom auth; requires compatibility/security spike.          |
-| ADR-004 | Public username/password and recovery code           | Confirmed          | No email dependency; loss of both credentials is unrecoverable.    |
-| ADR-005 | Server-only Prisma ownership; defer custom RLS       | Confirmed          | Straightforward MVP isolation; requires disciplined queries/tests. |
-| ADR-006 | `next-intl`, locale-prefixed routes                  | Confirmed          | Runtime bilingual RTL/LTR in one app.                              |
-| ADR-007 | Hybrid Server Actions/Route Handlers                 | Confirmed          | Aligns with Next.js and avoids unnecessary public API.             |
-| ADR-008 | Local versioned nutrition seed                       | Confirmed          | Deterministic, low-cost, Iran-focused; limited initial coverage.   |
-| ADR-009 | Optional PostgreSQL worker, no Redis                 | Confirmed          | Durable optional AI jobs with minimal infrastructure.              |
-| ADR-010 | Three AI features optional/feature-flagged           | Confirmed override | Core works without credentials/cost.                               |
-| ADR-011 | Temporary private media and post-confirm deletion    | Confirmed          | Privacy and Free-tier capacity.                                    |
-| ADR-012 | Online-only; no service worker/push                  | Confirmed override | Avoid offline/notification complexity.                             |
-| ADR-013 | Immediate irreversible account deletion              | Confirmed override | Simple privacy-conscious lifecycle.                                |
-| ADR-014 | Best-effort backup/recovery                          | Confirmed override | Educational/cost priority; not production SLA.                     |
-| ADR-015 | GitHub CI; Darkube Git build with gradual deployment | Confirmed/verify   | Simple learning workflow; platform triggers must be tested.        |
+| ID      | Decision                                             | Class              | Rationale/implication                                                            |
+| ------- | ---------------------------------------------------- | ------------------ | -------------------------------------------------------------------------------- |
+| ADR-001 | Modular monolith and boilerplate service boundaries  | Confirmed          | Lowest complexity; testable domain services.                                     |
+| ADR-002 | Darkube web hosting; Supabase Free DB/storage        | Confirmed          | Near-zero cost; external latency/quotas and pause risk accepted.                 |
+| ADR-003 | Better Auth embedded behind `IdentityService`        | Preferred/verify   | Avoid custom auth; requires compatibility/security spike.                        |
+| ADR-004 | Public username/password and recovery code           | Confirmed          | No email dependency; loss of both credentials is unrecoverable.                  |
+| ADR-005 | Server-only Prisma ownership; defer custom RLS       | Confirmed          | Straightforward MVP isolation; requires disciplined queries/tests.               |
+| ADR-006 | `next-intl`, locale-prefixed routes                  | Confirmed          | Runtime bilingual RTL/LTR in one app.                                            |
+| ADR-007 | Hybrid Server Actions/Route Handlers                 | Confirmed          | Aligns with Next.js and avoids unnecessary public API.                           |
+| ADR-008 | Local versioned nutrition seed                       | Confirmed          | Deterministic, low-cost, Iran-focused; limited initial coverage.                 |
+| ADR-009 | Optional PostgreSQL worker, no Redis                 | Confirmed          | Durable optional AI jobs with minimal infrastructure.                            |
+| ADR-010 | Three AI features optional/feature-flagged           | Confirmed override | Core works without credentials/cost.                                             |
+| ADR-011 | Temporary private media and post-confirm deletion    | Confirmed          | Privacy and Free-tier capacity.                                                  |
+| ADR-012 | Online-only; no service worker/push                  | Confirmed override | Avoid offline/notification complexity.                                           |
+| ADR-013 | Immediate irreversible account deletion              | Confirmed override | Simple privacy-conscious lifecycle.                                              |
+| ADR-014 | Best-effort backup/recovery                          | Confirmed override | Educational/cost priority; not production SLA.                                   |
+| ADR-015 | GitHub CI; Darkube Git build with gradual deployment | Confirmed/verify   | Simple learning workflow; platform triggers must be tested.                      |
+| ADR-016 | Four optional onboarding profile attributes          | Confirmed          | Nullable owner-private data; age eligibility and weight history remain separate. |
 
 ## 28. Technical risk register
 
@@ -771,19 +782,19 @@ Do not begin optional AI work before the manual vertical slice passes end to end
 
 ## 29. Requirements traceability
 
-| Requirement/journey group                  | Technical owners                                        | Primary verification                                                                          |
-| ------------------------------------------ | ------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| A01–A02, J01–J02 authentication/onboarding | Identity/Profile services, `next-intl` routes           | bilingual E2E, recovery/security tests                                                        |
-| O06–O08, P01–P04, J03/J04/J13              | Plan service, immutable snapshots, timeline transaction | unit + DB integration + E2E                                                                   |
-| M01–M05, J05–J10                           | Meal/Nutrition/Day services                             | calculation/idempotency/revision tests                                                        |
-| T01/H01–H04                                | summaries, reflections, weights                         | service + responsive E2E                                                                      |
-| J14 localization                           | `next-intl`, date/digit utilities                       | key parity, RTL/LTR and round-trip tests                                                      |
-| J15/J16 reflections/consent                | deterministic engine, optional AI jobs                  | no-consent/no-provider/failure tests                                                          |
-| J17 export                                 | Export service, signed private download                 | ownership/expiry/E2E                                                                          |
-| J18/S07 deletion                           | Account service, identity revocation, media cleanup     | partial-failure and session tests                                                             |
-| J19 AI images                              | Media, Job, AI adapters, editable drafts                | feature-disabled + mocked optional E2E                                                        |
-| J20 outages                                | error boundaries, retained drafts, fallbacks            | injected network/provider failure tests                                                       |
-| Product acceptance 1–32                    | corresponding services above                            | acceptance matrix maintained in test docs; AI availability clauses interpreted by section 1.2 |
+| Requirement/journey group                           | Technical owners                                        | Primary verification                                                                                                          |
+| --------------------------------------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| A01–A02, O01–O05, J01–J02 authentication/onboarding | Identity/Profile services, `next-intl` routes           | bilingual E2E including all/some/no optional profile attributes, resume, calendar/unit normalization, recovery/security tests |
+| O06–O08, P01–P04, J03/J04/J13                       | Plan service, immutable snapshots, timeline transaction | unit + DB integration + E2E                                                                                                   |
+| M01–M05, J05–J10                                    | Meal/Nutrition/Day services                             | calculation/idempotency/revision tests                                                                                        |
+| T01/H01–H04                                         | summaries, reflections, weights                         | service + responsive E2E                                                                                                      |
+| J14 localization                                    | `next-intl`, date/digit utilities                       | key parity, RTL/LTR and round-trip tests                                                                                      |
+| J15/J16 reflections/consent                         | deterministic engine, optional AI jobs                  | no-consent/no-provider/failure tests                                                                                          |
+| J17 export                                          | Export service, signed private download                 | optional profile fields, ownership/expiry/E2E                                                                                 |
+| J18/S07 deletion                                    | Account service, identity revocation, media cleanup     | optional profile fields, partial-failure and session tests                                                                    |
+| J19 AI images                                       | Media, Job, AI adapters, editable drafts                | feature-disabled + mocked optional E2E                                                                                        |
+| J20 outages                                         | error boundaries, retained drafts, fallbacks            | injected network/provider failure tests                                                                                       |
+| Product acceptance 1–32                             | corresponding services above                            | acceptance matrix maintained in test docs; AI availability clauses interpreted by section 1.2                                 |
 
 ## 30. Implementation readiness checklist
 

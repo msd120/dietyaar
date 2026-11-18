@@ -1,14 +1,16 @@
 # Diet Progress Companion Design Scope
 
-Version: 1.2  
-Date: 2026-11-15  
-Status: Behavioral design scope complete; visual design pending; aligned with [product-spec.md](./product-spec.md)
+Version: 1.3
+
+Date: 2026-11-16
+
+Status: Behavioral design scope complete; visual design pending; aligned with [product-spec.md](../product/product-spec.md)
 
 This document is the design source of truth for user-facing information architecture, pages and sheets, screen-level data and actions, reusable UI states, user journeys, and responsive bilingual coverage. Product policy, eligibility, calculation rules, data contracts, safety boundaries, and acceptance criteria remain owned by [product-spec.md](../product/product-spec.md). Visual tokens, component styling, detailed layout direction, and final brand expression belong in [visual-design.md](./visual-design.md) or an approved Figma file. Until that source exists, neutral accessible temporary tokens are approved but do not constitute final visual design.
 
 ## Revision 1.1 resolved decisions
 
-- Age is collected once on O02; O03 does not repeat it.
+- Age is collected once on O02; O03 does not repeat it. Revision 1.3 adds a separate optional birth-year profile field without changing age-based eligibility.
 - Declining AI consent disables AI image processing and selects deterministic localized morning check-ins while preserving all manual plan and meal flows.
 - Revision 1.1 named plan-image extraction and AI-written check-ins as the two AI data uses. Revision 1.2 adds user-selected meal photos for food recognition as a third separately disclosed use.
 - Meal review uses database/manual nutrient sources and deterministic or user-confirmed plan matching. Model-generated nutrient estimates, confidence scores, and automatic plan mappings remain outside MVP; Revision 1.2 adds only editable meal-photo food recognition.
@@ -16,6 +18,12 @@ This document is the design source of truth for user-facing information architec
 ## Revision 1.2 resolved decision
 
 - Meal-photo food recognition is a required MVP method. It uses one configured approved AI provider—DeepSeek, GapGPT, or AvalAI—and always produces an editable review draft. AI does not supply final nutrient provenance or automatically confirm plan matching; database/manual values and explicit user confirmation remain authoritative.
+
+## Revision 1.3 resolved decision
+
+- O03 offers optional height, profile weight, gender, and birth year. Each field and the entire group may be skipped; values persist across Back, refresh, and resumed onboarding and remain editable in S02.
+- O02 age remains the adult-eligibility input. O03 birth year is optional profile information and never silently replaces or recalculates eligibility.
+- O03 profile weight is not weight tracking. It does not enable tracking or create a history entry; H03 remains the explicit first-entry flow after the user opts in.
 
 ## 1. Information architecture and design scope
 
@@ -78,11 +86,11 @@ This section defines the MVP design surface. Each numbered item is a distinct re
 
 **Purpose:** Collect basic personalization after eligibility is already established.
 
-**Shows:** Preferred name optional; metric/imperial unit preference; explanation of unit behavior; Back/Edit eligibility link. Age, height, weight, sex, and gender are not shown.
+**Shows:** Preferred name optional; metric/imperial unit preference; explanation of unit behavior; Back/Edit eligibility link; and a clearly optional personal-information group containing height, profile weight, gender, and birth year. Persian presents a Jalali-friendly birth-year control and Persian numerals; English presents a Gregorian year control. The group explains that these values are private, editable later, and not needed for plans, meal logging, Today, or progress calculations. Age is not repeated.
 
-**Actions:** Enter/edit preferred name; select unit preference; continue; back or open Edit eligibility.
+**Actions:** Enter/edit preferred name; select unit preference; enter any subset of optional personal information; choose an inclusive gender option or bounded self-description; Skip; Continue; back or open Edit eligibility.
 
-**States:** Name empty or entered; unit selected; saved/failed. No calorie target is generated.
+**States:** All optional attributes empty; all entered; partial entry; field-level invalid value; unusual measurement clarification; birth-year/eligibility inconsistency requiring correction or Skip; saved/failed. Back, refresh, and resume restore entered values. No calorie target is generated. Empty optional fields never show validation errors.
 
 #### O04 Goal and plan context
 
@@ -286,11 +294,11 @@ This section defines the MVP design surface. Each numbered item is a distinct re
 
 #### S02 Profile and goals
 
-**Shows:** Preferred name; age; goal; unit preference; weight-tracking on/off state; optional dietary preferences/allergy notes; plan authorship is managed on the plan, not profile. Height, profile weight, sex, and gender are not collected.
+**Shows:** Preferred name; age; goal; unit preference; optional height, profile weight, gender, and birth year; weight-tracking on/off state; optional dietary preferences/allergy notes; plan authorship is managed on the plan, not profile. Profile weight and tracked weight history are labeled as separate concepts.
 
-**Actions:** Edit and save; switch units; enable weight tracking and continue to H03 for the first entry; disable weight tracking with a clear retention explanation; cancel.
+**Actions:** Edit, clear, and save optional personal attributes; switch units; enable weight tracking and continue to H03 for the first entry; disable weight tracking with a clear retention explanation; cancel. If a profile weight exists after tracking is enabled, H03 may offer it as a prefill but requires explicit confirmation before creating the first entry.
 
-**Rules:** Enabling tracking requests the first weight only after explicit confirmation. Disabling tracking hides weight prompts and trends but does not delete existing entries; deletion remains available in H04. Changing goal or unit preference does not alter plan targets or canonical stored weights.
+**Rules:** Editing profile weight never edits weight history. Enabling tracking requests the first tracked weight only after explicit confirmation and never converts profile weight into history automatically. Disabling tracking hides weight prompts and trends but does not delete existing entries; deletion remains available in H04. Changing goal, unit preference, or optional personal information does not alter plan targets or canonical stored weights.
 
 #### S03 Language and appearance
 
@@ -365,7 +373,7 @@ Each journey must be designed and tested in Persian RTL and English LTR. A journ
 ### J01 New user to first confirmed meal
 
 1. User opens A01, chooses language, enters email, and completes A02.
-2. User completes O01–O05, including eligibility, consent, profile, goal, non-clinical declaration, timezone, and appearance.
+2. User completes O01–O05, including eligibility, consent, profile, goal, non-clinical declaration, timezone, and appearance. In O03 the user may enter all, some, or none of height, profile weight, gender, and birth year without affecting progress.
 3. User either selects Manual entry in O06, structures and activates a plan through O07–O08, or selects Continue without a plan.
 4. O09 sends the user to M01 with Log first meal emphasized. Without a plan, Add a plan remains available as a secondary action.
 5. User enters meal metadata in M02, reviews items and nutrients in M03, and confirms.
@@ -377,9 +385,9 @@ Each journey must be designed and tested in Persian RTL and English LTR. A journ
 
 1. User leaves after any completed onboarding step.
 2. Returning authentication restores persisted answers and opens the first incomplete page.
-3. Back reveals previously confirmed values; editing them updates dependent validation without erasing the plan draft.
+3. Back reveals previously confirmed values, including any partially entered optional personal information; editing or clearing them updates dependent validation without erasing the plan draft.
 
-**Success condition:** No confirmed step or draft is lost, and the user cannot accidentally bypass required eligibility or consent.
+**Success condition:** No confirmed step, optional profile value, or draft is lost, and the user cannot accidentally bypass required eligibility or consent. Skipping all optional personal attributes is valid.
 
 ### J03 Activate a plan without numeric targets
 
@@ -456,6 +464,8 @@ Each journey must be designed and tested in Persian RTL and English LTR. A journ
 3. With one entry, History shows the value without a trend.
 4. With at least two entries, H01/H04 show a neutral compact trend.
 5. User can edit/delete entries in H04 or disable tracking in S02. Disabling hides weight UI but preserves entries until the user deletes them.
+
+An optional O03/S02 profile weight may prefill H03 only after tracking is explicitly enabled. The user must still confirm the measurement date/value to create a `WeightEntry`; skipping or editing profile weight never changes tracking state or history.
 
 **Success condition:** No meal-level attribution, BMI judgment, automatic goal, or plan-target change occurs.
 
@@ -535,5 +545,6 @@ The design is complete only when it includes:
 - All page-specific empty, loading, processing, partial-data, service-failure, permission-denied, and offline states listed above.
 - Keyboard order, focus return, screen-reader labels/status announcements, touch targets, text expansion, reduced motion, and contrast annotations for critical components.
 - Content specifications for Persian and English system copy, including validation and fallback text; user-entered content may remain fixture data.
+- O03/S02 variants for all four optional personal attributes: all entered, all skipped, partial entry, edit/clear, resume, invalid input, Jalali/Gregorian birth-year presentation, and profile-weight-with-tracking-disabled. Copy must not pressure disclosure.
 - Prototype coverage for J01, J05, J09, J10, J13, J14, J16, both J19 image flows, and J20.
 - A traceability note from each frame or component to its page ID and relevant journey ID. Designs without these identifiers are not considered implementation-ready.
