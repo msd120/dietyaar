@@ -15,6 +15,10 @@ const vitestCli = path.join(repositoryRoot, 'node_modules', 'vitest', 'vitest.mj
 const env = {
   ...process.env,
   DATABASE_URL: testDatabaseUrl,
+  // Prisma CLI reads DIRECT_URL from prisma.config.ts. Pin both URLs to the
+  // validated test database so a developer's migration URL can never leak
+  // into an integration run.
+  DIRECT_URL: testDatabaseUrl,
   NODE_ENV: 'test',
 };
 

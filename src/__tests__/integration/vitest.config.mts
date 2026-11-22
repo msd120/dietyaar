@@ -8,6 +8,7 @@ export default defineConfig({
     maxWorkers: 1,
     fileParallelism: false,
     testTimeout: 20_000,
+    setupFiles: ['src/__tests__/integration/setup.ts'],
   },
   resolve: {
     alias: { '@': path.resolve(import.meta.dirname, '../..') },

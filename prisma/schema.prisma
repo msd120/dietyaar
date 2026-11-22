@@ -3,10 +3,677 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-// Models are introduced with reviewed migrations during the Better Auth
-// compatibility spike and the manual product vertical slice. The template's
-// custom admin/session schema was intentionally removed.
+model User {
+  id                 String               @id
+  name               String
+  email              String               @unique
+  emailVerified      Boolean              @default(false)
+  image              String?
+  username           String?              @unique
+  displayUsername    String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  sessions           Session[]
+  accounts           Account[]
+  recovery           RecoveryCredential?
+  profile            Profile?
+  planDrafts         PlanDraft[]
+  planVersions       DietPlanVersion[]
+  mealDrafts         MealDraft[]
+  meals              Meal[]
+  dayStates          DayState[]
+  consents           Consent[]
+  preferences        Preferences?
+  weightEntries      WeightEntry[]
+  reflections        Reflection[]
+  savedMeals         SavedMeal[]
+  mealRevisions      MealRevision[]
+  slotOccurrences    PlanSlotOccurrence[]
+  reflectionFeedback ReflectionFeedback[]
+  mediaAssets        MediaAsset[]
+  jobs               Job[]
+  aiAnalyses         AiAnalysis[]
+  userFoods          UserFood[]
+
+  @@map("user")
+}
+
+enum Goal {
+  LOSE_WEIGHT
+  MAINTAIN_WEIGHT
+  GAIN_WEIGHT
+}
+
+enum UnitSystem {
+  METRIC
+  IMPERIAL
+}
+
+enum MealType {
+  BREAKFAST
+  MORNING_SNACK
+  LUNCH
+  AFTERNOON_SNACK
+  DINNER
+  UNPLANNED
+}
+
+enum MealDraftState {
+  EDITING
+  READY_FOR_REVIEW
+  CONFIRMED
+  DISCARDED
+}
+
+enum MealStatus {
+  CONFIRMED
+  DELETED
+}
+
+enum AuthThrottlePurpose {
+  REGISTRATION
+  LOGIN
+  RECOVERY
+}
+
+enum PlanDraftState {
+  EDITING
+  READY_FOR_REVIEW
+  ACTIVATED
+  ARCHIVED
+}
+
+enum PlanSourceType {
+  MANUAL
+  IMAGE
+}
+
+enum PlanVersionStatus {
+  ACTIVE
+  SCHEDULED
+  HISTORICAL
+}
+
+enum Gender {
+  WOMAN
+  MAN
+  NON_BINARY
+  SELF_DESCRIBED
+  PREFER_NOT_TO_SAY
+}
+
+enum BirthYearCalendar {
+  JALALI
+  GREGORIAN
+}
+
+enum ConsentPurpose {
+  TERMS_PRIVACY
+  PLAN_IMAGE
+  MEAL_IMAGE
+  AI_REFLECTION
+}
+
+enum Theme {
+  SYSTEM
+  LIGHT
+  DARK
+}
+
+enum SlotExplicitState {
+  SKIPPED
+}
+
+enum ReflectionFeedbackValue {
+  HELPFUL
+  NOT_HELPFUL
+}
+
+enum MediaPurpose {
+  PLAN_IMAGE
+  MEAL_IMAGE
+}
+
+enum MediaState {
+  PENDING_UPLOAD
+  UPLOADED
+  READY
+  INVALID
+  DELETING
+  DELETED
+  EXPIRED
+}
+
+enum JobType {
+  PLAN_IMAGE_EXTRACT
+  MEAL_PHOTO_RECOGNIZE
+  AI_REFLECTION
+  EXPORT_BUILD
+  MEDIA_DELETE
+  MEDIA_EXPIRE
+  SUMMARY_REBUILD
+}
+
+enum JobState {
+  QUEUED
+  RUNNING
+  RETRY_WAIT
+  SUCCEEDED
+  FAILED
+  CANCELED
+  SUPERSEDED
+}
+
+enum AiPurpose {
+  PLAN_IMAGE
+  MEAL_IMAGE
+  REFLECTION
+}
+
+enum AiAnalysisState {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+  CANCELED
+  SUPERSEDED
+}
+
+enum CatalogReleaseState {
+  DEVELOPMENT_FIXTURE
+  APPROVED
+}
+
+model Profile {
+  userId                String             @id
+  preferredName         String?
+  age                   Int?
+  goal                  Goal?
+  unitSystem            UnitSystem         @default(METRIC)
+  timezone              String             @default("Asia/Tehran")
+  locale                String             @default("fa")
+  onboardingStep        Int                @default(1)
+  onboardingCompleteAt  DateTime?
+  heightCm              Decimal?           @db.Decimal(8, 3)
+  profileWeightKg       Decimal?           @db.Decimal(8, 3)
+  gender                Gender?
+  genderSelfDescription String?
+  birthYear             Int?
+  birthYearCalendar     BirthYearCalendar?
+  planSource            String?
+  medicalPlan           Boolean            @default(false)
+  dietaryNotes          String?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Consent {
+  id            String         @id @default(cuid())
+  userId        String
+  purpose       ConsentPurpose
+  policyVersion String
+  grantedAt     DateTime?
+  revokedAt     DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, purpose])
+  @@index([userId, grantedAt])
+}
+
+model Preferences {
+  userId                String   @id
+  theme                 Theme    @default(SYSTEM)
+  morningTime           String   @default("08:00")
+  weightTrackingEnabled Boolean  @default(false)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PlanDraft {
+  id              String         @id @default(cuid())
+  userId          String
+  title           String?
+  sourceNote      String?
+  sourceType      PlanSourceType @default(MANUAL)
+  state           PlanDraftState @default(EDITING)
+  medicalBoundary Boolean        @default(false)
+  content         Json           @default("{}")
+  revision        Int            @default(1)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, updatedAt])
+}
+
+model DietPlanVersion {
+  id               String               @id @default(cuid())
+  userId           String
+  status           PlanVersionStatus
+  effectiveFrom    DateTime             @db.Date
+  effectiveTo      DateTime?            @db.Date
+  schemaVersion    Int                  @default(1)
+  sourceType       PlanSourceType
+  snapshot         Json
+  createdAt        DateTime             @default(now())
+  correctionReason String?
+  user             User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meals            Meal[]
+  slotOccurrences  PlanSlotOccurrence[]
+
+  @@index([userId, effectiveFrom])
+  @@index([userId, status])
+}
+
+model MealDraft {
+  id              String          @id @default(cuid())
+  userId          String
+  state           MealDraftState  @default(EDITING)
+  consumedAtUtc   DateTime
+  localDate       DateTime        @db.Date
+  timezoneAtEntry String
+  mealType        MealType
+  linkedSlotId    String?
+  revision        Int             @default(1)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items           MealDraftItem[]
+  confirmedMeal   Meal?
+
+  @@index([userId, state, updatedAt])
+  @@index([userId, localDate, consumedAtUtc])
+}
+
+model MealDraftItem {
+  id            String    @id @default(cuid())
+  mealDraftId   String
+  displayName   String
+  grams         Decimal?  @db.Decimal(12, 4)
+  energyKcal    Decimal?  @db.Decimal(12, 4)
+  proteinG      Decimal?  @db.Decimal(12, 4)
+  carbohydrateG Decimal?  @db.Decimal(12, 4)
+  fatG          Decimal?  @db.Decimal(12, 4)
+  fiberG        Decimal?  @db.Decimal(12, 4)
+  sourceType    String
+  sourceId      String?
+  sourceVersion String?
+  snapshotBasis String
+  createdAt     DateTime  @default(now())
+  mealDraft     MealDraft @relation(fields: [mealDraftId], references: [id], onDelete: Cascade)
+
+  @@index([mealDraftId])
+}
+
+model Meal {
+  id                   String           @id @default(cuid())
+  userId               String
+  sourceDraftId        String?          @unique
+  planVersionId        String?
+  status               MealStatus       @default(CONFIRMED)
+  consumedAtUtc        DateTime
+  localDate            DateTime         @db.Date
+  timezoneAtEntry      String
+  mealType             MealType
+  slotId               String?
+  revision             Int              @default(1)
+  pendingDeletionUntil DateTime?
+  deletedAt            DateTime?
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  user                 User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceDraft          MealDraft?       @relation(fields: [sourceDraftId], references: [id], onDelete: Restrict)
+  planVersion          DietPlanVersion? @relation(fields: [planVersionId], references: [id], onDelete: SetNull)
+  items                MealItem[]
+  revisions            MealRevision[]
+
+  @@index([userId, localDate, consumedAtUtc])
+  @@index([userId, pendingDeletionUntil])
+  @@index([planVersionId])
+}
+
+model MealRevision {
+  id        String   @id @default(cuid())
+  userId    String
+  mealId    String
+  revision  Int
+  snapshot  Json
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meal      Meal     @relation(fields: [mealId], references: [id], onDelete: Cascade)
+
+  @@unique([mealId, revision])
+  @@index([userId, createdAt])
+}
+
+model SavedMeal {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  snapshot  Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, updatedAt])
+}
+
+model MealItem {
+  id            String   @id @default(cuid())
+  mealId        String
+  displayName   String
+  grams         Decimal? @db.Decimal(12, 4)
+  energyKcal    Decimal? @db.Decimal(12, 4)
+  proteinG      Decimal? @db.Decimal(12, 4)
+  carbohydrateG Decimal? @db.Decimal(12, 4)
+  fatG          Decimal? @db.Decimal(12, 4)
+  fiberG        Decimal? @db.Decimal(12, 4)
+  sourceType    String
+  sourceId      String?
+  sourceVersion String?
+  snapshotBasis String
+  createdAt     DateTime @default(now())
+  meal          Meal     @relation(fields: [mealId], references: [id], onDelete: Cascade)
+
+  @@index([mealId])
+}
+
+model CatalogVersion {
+  id             String              @id @default(cuid())
+  version        String              @unique
+  sourceDocument String
+  licenseNote    String
+  releaseState   CatalogReleaseState @default(DEVELOPMENT_FIXTURE)
+  importedAt     DateTime            @default(now())
+  foods          CatalogFood[]
+}
+
+model CatalogFood {
+  id               String           @id @default(cuid())
+  versionId        String
+  canonicalNameFa  String
+  canonicalNameEn  String?
+  normalizedNameFa String
+  normalizedNameEn String?
+  aliases          String[]         @default([])
+  basisGrams       Decimal          @default(100) @db.Decimal(12, 4)
+  energyKcal       Decimal?         @db.Decimal(12, 4)
+  proteinG         Decimal?         @db.Decimal(12, 4)
+  carbohydrateG    Decimal?         @db.Decimal(12, 4)
+  fatG             Decimal?         @db.Decimal(12, 4)
+  fiberG           Decimal?         @db.Decimal(12, 4)
+  confidenceLabel  String
+  sourceCitation   String
+  sourceFoodId     String?
+  version          CatalogVersion   @relation(fields: [versionId], references: [id], onDelete: Restrict)
+  servings         CatalogServing[]
+
+  @@unique([versionId, normalizedNameFa])
+  @@index([versionId, normalizedNameEn])
+}
+
+model CatalogServing {
+  id      String      @id @default(cuid())
+  foodId  String
+  labelFa String
+  labelEn String?
+  grams   Decimal     @db.Decimal(12, 4)
+  notes   String?
+  food    CatalogFood @relation(fields: [foodId], references: [id], onDelete: Cascade)
+
+  @@index([foodId])
+}
+
+model UserFood {
+  id             String   @id @default(cuid())
+  userId         String
+  name           String
+  normalizedName String
+  basisAmount    Decimal  @db.Decimal(12, 4)
+  basisUnit      String
+  energyKcal     Decimal? @db.Decimal(12, 4)
+  proteinG       Decimal? @db.Decimal(12, 4)
+  carbohydrateG  Decimal? @db.Decimal(12, 4)
+  fatG           Decimal? @db.Decimal(12, 4)
+  fiberG         Decimal? @db.Decimal(12, 4)
+  sourceNote     String?
+  revision       Int      @default(1)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, normalizedName])
+  @@index([userId, updatedAt])
+}
+
+model DayState {
+  userId      String
+  localDate   DateTime  @db.Date
+  completedAt DateTime?
+  reopenedAt  DateTime?
+  revision    Int       @default(1)
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, localDate])
+}
+
+model PlanSlotOccurrence {
+  id            String             @id @default(cuid())
+  userId        String
+  localDate     DateTime           @db.Date
+  planVersionId String
+  slotId        String
+  explicitState SlotExplicitState?
+  revision      Int                @default(1)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planVersion   DietPlanVersion    @relation(fields: [planVersionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, localDate, planVersionId, slotId])
+  @@index([userId, localDate])
+}
+
+model WeightEntry {
+  id         String   @id @default(cuid())
+  userId     String
+  measuredOn DateTime @db.Date
+  weightKg   Decimal  @db.Decimal(8, 3)
+  note       String?
+  revision   Int      @default(1)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, measuredOn])
+}
+
+model Reflection {
+  id             String               @id @default(cuid())
+  userId         String
+  localDate      DateTime             @db.Date
+  sourceRevision Int
+  templateKey    String
+  facts          Json
+  createdAt      DateTime             @default(now())
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  feedback       ReflectionFeedback[]
+
+  @@unique([userId, localDate])
+  @@index([userId, createdAt])
+}
+
+model ReflectionFeedback {
+  reflectionId String
+  userId       String
+  value        ReflectionFeedbackValue
+  updatedAt    DateTime                @updatedAt
+  reflection   Reflection              @relation(fields: [reflectionId], references: [id], onDelete: Cascade)
+  user         User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([reflectionId, userId])
+  @@index([userId, updatedAt])
+}
+
+model MediaAsset {
+  id                String       @id @default(cuid())
+  userId            String
+  bucket            String
+  objectPath        String       @unique
+  purpose           MediaPurpose
+  state             MediaState   @default(PENDING_UPLOAD)
+  mimeType          String
+  byteSize          Int
+  sha256            String?
+  retentionDeadline DateTime
+  deletedAt         DateTime?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analyses          AiAnalysis[]
+
+  @@index([userId, purpose, state])
+  @@index([state, retentionDeadline])
+}
+
+model Job {
+  id             String      @id @default(cuid())
+  userId         String
+  type           JobType
+  state          JobState    @default(QUEUED)
+  payloadVersion Int         @default(1)
+  payloadJson    Json
+  resultJson     Json?
+  idempotencyKey String      @unique
+  attempts       Int         @default(0)
+  maxAttempts    Int         @default(3)
+  runAfter       DateTime    @default(now())
+  leaseOwner     String?
+  leaseUntil     DateTime?
+  safeErrorCode  String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analysis       AiAnalysis?
+
+  @@index([state, runAfter])
+  @@index([userId, createdAt])
+}
+
+model AiAnalysis {
+  id             String          @id @default(cuid())
+  userId         String
+  jobId          String          @unique
+  purpose        AiPurpose
+  provider       String
+  model          String
+  inputMediaId   String?
+  draftType      String
+  draftId        String
+  draftRevision  Int
+  schemaVersion  Int             @default(1)
+  promptVersion  String
+  state          AiAnalysisState @default(QUEUED)
+  safeErrorCode  String?
+  tokenUsageJson Json?
+  latencyMs      Int?
+  createdAt      DateTime        @default(now())
+  completedAt    DateTime?
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job            Job             @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  inputMedia     MediaAsset?     @relation(fields: [inputMediaId], references: [id], onDelete: SetNull)
+
+  @@index([userId, purpose, createdAt])
+  @@index([inputMediaId])
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model RecoveryCredential {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  codeHash      String
+  version       Int      @default(1)
+  lastRotatedAt DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuthThrottle {
+  purpose       AuthThrottlePurpose
+  subjectHash   String
+  windowStarted DateTime
+  attempts      Int                 @default(0)
+  blockedUntil  DateTime?
+  updatedAt     DateTime            @updatedAt
+
+  @@id([purpose, subjectHash])
+  @@index([blockedUntil])
+}
+
+model AuthAuditEvent {
+  id        String   @id @default(cuid())
+  userId    String?
+  event     String
+  outcome   String
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([event, createdAt])
+}

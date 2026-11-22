@@ -18,12 +18,28 @@ describe('database foundation', () => {
       ORDER BY migration_name
     `;
 
-    expect(rows).toEqual([
-      expect.objectContaining({
-        migration_name: '20261118000000_foundation',
-        finished_at: expect.any(Date),
-      }),
-    ]);
+    expect(rows).toEqual(
+      [
+        '20261118000000_foundation',
+        '20261121090000_better_auth',
+        '20261121110000_manual_core_foundation',
+        '20261121120000_manual_meal_draft_items',
+        '20261121130000_auth_throttles_and_audit_events',
+        '20261122110000_recovery_credentials',
+        '20261122120000_onboarding_profile_preferences',
+        '20261122130000_plan_versions',
+        '20261122140000_meal_idempotency_plan_link',
+        '20261122150000_weights_reflections',
+        '20261122160000_manual_lifecycle',
+        '20261122170000_media_jobs_domain_completion',
+        '20261122180000_nutrition_catalog_and_slots',
+      ].map((migration_name) =>
+        expect.objectContaining({
+          migration_name,
+          finished_at: expect.any(Date),
+        }),
+      ),
+    );
   });
 
   it('enforces PostgreSQL constraints without leaving test data behind', async () => {

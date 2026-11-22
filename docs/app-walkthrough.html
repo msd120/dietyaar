@@ -1,0 +1,1117 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Dietyaar — Product walkthrough</title>
+    <style>
+      :root {
+        --ink: #171717;
+        --muted: #707070;
+        --line: #dfdfdf;
+        --soft: #fafafa;
+        --green: #3ecf8e;
+        --green-deep: #2da970;
+        --dark: #1c1c1c;
+        --danger: #b42318;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #fff;
+        color: var(--ink);
+        font:
+          15px/1.5 Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          sans-serif;
+      }
+      button {
+        font: inherit;
+        cursor: pointer;
+      }
+      .top {
+        position: sticky;
+        z-index: 5;
+        top: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 14px max(20px, calc((100vw - 1180px) / 2));
+        background: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--line);
+      }
+      .brand {
+        font-weight: 700;
+        letter-spacing: -0.4px;
+        font-size: 18px;
+      }
+      .leaf {
+        color: #087443;
+        margin-inline-end: 7px;
+      }
+      .controls {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .btn {
+        min-height: 36px;
+        border: 1px solid #c7c7c7;
+        border-radius: 6px;
+        background: #fff;
+        color: var(--ink);
+        padding: 8px 12px;
+        font-weight: 600;
+      }
+      .btn.primary {
+        border-color: var(--green);
+        background: var(--green);
+      }
+      .btn.active {
+        background: var(--dark);
+        border-color: var(--dark);
+        color: #fff;
+      }
+      .hero {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 68px 20px 50px;
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 48px;
+        align-items: end;
+      }
+      .eyebrow {
+        color: #087443;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .hero h1 {
+        font-size: clamp(38px, 6vw, 68px);
+        font-weight: 500;
+        letter-spacing: -0.06em;
+        line-height: 1.02;
+        margin: 12px 0 20px;
+      }
+      .hero p {
+        max-width: 670px;
+        font-size: 18px;
+        color: var(--muted);
+      }
+      .hero-card {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 26px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      }
+      .hero-card strong {
+        font-size: 34px;
+        letter-spacing: -0.06em;
+      }
+      .hero-card p {
+        font-size: 14px;
+        margin: 8px 0 0;
+      }
+      .legend {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-top: 20px;
+      }
+      .legend div {
+        border: 1px solid var(--line);
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 12px;
+      }
+      .dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--green);
+        margin-inline-end: 5px;
+      }
+      .dot.gray {
+        background: #9a9a9a;
+      }
+      .dot.dark {
+        background: var(--dark);
+      }
+      .layout {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 0 20px 72px;
+        display: grid;
+        grid-template-columns: 270px 1fr;
+        gap: 28px;
+      }
+      .nav {
+        position: sticky;
+        top: 72px;
+        align-self: start;
+        max-height: calc(100vh - 92px);
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 10px;
+      }
+      .nav h2 {
+        margin: 12px 10px 5px;
+        color: var(--muted);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .nav button {
+        display: flex;
+        width: 100%;
+        text-align: start;
+        justify-content: space-between;
+        gap: 8px;
+        border: 0;
+        border-radius: 6px;
+        padding: 9px 10px;
+        background: transparent;
+        color: var(--ink);
+      }
+      .nav button:hover,
+      .nav button.selected {
+        background: #edf9f3;
+      }
+      .nav code {
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .stage {
+        min-width: 0;
+      }
+      .stage-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        gap: 20px;
+        padding: 6px 0 20px;
+      }
+      .stage-head h2 {
+        margin: 0;
+        font-size: 28px;
+        letter-spacing: -0.04em;
+      }
+      .stage-head p {
+        margin: 4px 0 0;
+        color: var(--muted);
+      }
+      .badge {
+        border-radius: 999px;
+        background: #edf9f3;
+        padding: 4px 9px;
+        color: #087443;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+      .device {
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+      }
+      .appbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--line);
+        font-size: 13px;
+      }
+      .appname {
+        font-weight: 700;
+      }
+      .appbody {
+        padding: 24px;
+        min-height: 430px;
+        background: var(--soft);
+      }
+      .crumb {
+        color: var(--muted);
+        font-size: 12px;
+        margin-bottom: 16px;
+      }
+      .screen-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      .screen-title h3 {
+        margin: 0;
+        font-size: 23px;
+        letter-spacing: -0.03em;
+      }
+      .screen-grid {
+        display: grid;
+        grid-template-columns: 1.35fr 0.85fr;
+        gap: 16px;
+      }
+      .panel {
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 12px;
+        padding: 18px;
+      }
+      .panel h4 {
+        margin: 0 0 8px;
+        font-size: 15px;
+      }
+      .panel p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .item {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 11px 0;
+        border-bottom: 1px solid #efefef;
+        font-size: 13px;
+      }
+      .item:last-child {
+        border: 0;
+      }
+      .fake-input {
+        margin-top: 10px;
+        padding: 10px 11px;
+        min-height: 38px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        color: #9a9a9a;
+        font-size: 13px;
+      }
+      .action {
+        display: inline-flex;
+        margin-top: 16px;
+        padding: 9px 13px;
+        border: 0;
+        border-radius: 6px;
+        background: var(--green);
+        color: var(--ink);
+        font-weight: 700;
+        font-size: 13px;
+      }
+      .note {
+        margin-top: 16px;
+        padding: 12px;
+        border-inline-start: 3px solid var(--green);
+        background: #edf9f3;
+        font-size: 13px;
+      }
+      .state-area {
+        margin-top: 22px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .states,
+      .review {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 18px;
+      }
+      .states h3,
+      .review h3 {
+        margin: 0 0 9px;
+        font-size: 16px;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+      }
+      .chip {
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #f2f2f2;
+        font-size: 12px;
+      }
+      .chip.warn {
+        color: #8a4b00;
+        background: #fff3dc;
+      }
+      .chip.error {
+        color: var(--danger);
+        background: #fff0ef;
+      }
+      .review p {
+        color: var(--muted);
+        font-size: 13px;
+        margin: 0;
+      }
+      .journeys {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 0 20px 80px;
+      }
+      .journeys h2 {
+        font-size: 28px;
+        letter-spacing: -0.04em;
+      }
+      .journey-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      .journey {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 20px;
+      }
+      .journey h3 {
+        margin: 0 0 10px;
+        font-size: 16px;
+      }
+      .journey ol {
+        padding-inline-start: 20px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .journey li + li {
+        margin-top: 5px;
+      }
+      .footer {
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        text-align: center;
+        font-size: 12px;
+        padding: 24px;
+      }
+      .rtl {
+        direction: rtl;
+        font-family: Tahoma, Arial, sans-serif;
+      }
+      .rtl .hero,
+      .rtl .layout,
+      .rtl .journeys {
+        text-align: right;
+      }
+      .rtl .nav button {
+        text-align: right;
+      }
+      .rtl .leaf {
+        margin: 0 0 0 7px;
+      }
+      .rtl .note {
+        border-inline-start: 0;
+        border-inline-end: 3px solid var(--green);
+      }
+      @media (max-width: 800px) {
+        .hero {
+          grid-template-columns: 1fr;
+          padding-top: 42px;
+          gap: 25px;
+        }
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .nav {
+          position: static;
+          max-height: 250px;
+        }
+        .screen-grid,
+        .state-area,
+        .journey-grid {
+          grid-template-columns: 1fr;
+        }
+        .stage-head {
+          flex-direction: column;
+        }
+        .legend {
+          grid-template-columns: 1fr;
+        }
+        .top {
+          padding: 12px 16px;
+        }
+        .hero h1 {
+          font-size: 42px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">
+        <span class="leaf">◆</span>Dietyaar
+        <span style="color: #707070; font-weight: 400">/ review walkthrough</span>
+      </div>
+      <div class="controls">
+        <button id="locale" class="btn">فارسی</button
+        ><button id="mode" class="btn">Dark preview</button>
+      </div>
+    </header>
+    <main>
+      <section class="hero">
+        <div>
+          <div class="eyebrow">MVP product review · v1.3</div>
+          <h1>See the whole experience, before building every screen.</h1>
+          <p>
+            An interactive, static companion to the product and design specifications. Use the
+            navigator to inspect every defined surface, key decisions, and the flows that keep
+            manual tracking usable even without AI.
+          </p>
+        </div>
+        <aside class="hero-card">
+          <span class="eyebrow">Review coverage</span><strong id="count">33</strong> screens and
+          sheets
+          <p>
+            Persian RTL and English LTR are paired at runtime. This file uses sample content only;
+            it does not collect, store, or transmit data.
+          </p>
+          <div class="legend">
+            <div><span class="dot"></span> Confirmed input</div>
+            <div><span class="dot gray"></span> Unknown stays unknown</div>
+            <div><span class="dot dark"></span> AI suggests only</div>
+          </div>
+        </aside>
+      </section>
+      <section class="layout">
+        <nav class="nav" id="nav" aria-label="Walkthrough screens"></nav>
+        <section class="stage">
+          <div class="stage-head">
+            <div>
+              <h2 id="stageTitle">Today</h2>
+              <p id="stageDescription"></p>
+            </div>
+            <span class="badge" id="stageId">T01</span>
+          </div>
+          <div class="device">
+            <div class="appbar">
+              <span class="appname">◆ Dietyaar</span><span id="appMeta">Saturday, 21 Nov</span>
+            </div>
+            <div class="appbody">
+              <div class="crumb" id="crumb"></div>
+              <div class="screen-title">
+                <h3 id="previewTitle"></h3>
+                <span class="badge" id="typeBadge"></span>
+              </div>
+              <div class="screen-grid">
+                <div class="panel">
+                  <h4 id="primaryHeading"></h4>
+                  <p id="primaryCopy"></p>
+                  <div id="examples"></div>
+                  <button class="action" id="actionButton"></button>
+                </div>
+                <div class="panel">
+                  <h4>Review notes</h4>
+                  <p id="reviewNotes"></p>
+                  <div class="note" id="guardrail"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="state-area">
+            <div class="states">
+              <h3>Required states</h3>
+              <div id="states" class="chips"></div>
+            </div>
+            <div class="review">
+              <h3>What to validate</h3>
+              <p id="validate"></p>
+            </div>
+          </div>
+        </section>
+      </section>
+      <section class="journeys">
+        <h2>Critical journeys</h2>
+        <div class="journey-grid">
+          <article class="journey">
+            <h3>1. First manual value</h3>
+            <ol>
+              <li>Welcome → eligibility & required legal consent.</li>
+              <li>Optional profile details and context.</li>
+              <li>Manual plan → review → explicit activation.</li>
+              <li>Log a structured meal → review sources → confirm.</li>
+              <li>Today shows only known, confirmed totals.</li>
+            </ol>
+          </article>
+          <article class="journey">
+            <h3>2. No-AI fallback</h3>
+            <ol>
+              <li>Decline the optional AI-processing consent.</li>
+              <li>Plan image and meal-photo routes explain they are unavailable.</li>
+              <li>Manual plan and structured meal entry remain primary.</li>
+              <li>Morning card uses a deterministic localized template.</li>
+              <li>No AI outcome ever changes a record without confirmation.</li>
+            </ol>
+          </article>
+          <article class="journey">
+            <h3>3. Progress without judgment</h3>
+            <ol>
+              <li>Mark a day complete only when all intake is logged.</li>
+              <li>Review seven-day rows with unknown-data markers.</li>
+              <li>Enable weight tracking separately, if wanted.</li>
+              <li>Add an explicit measurement, then see a neutral trend.</li>
+              <li>Never infer a cause from meals or predict an outcome.</li>
+            </ol>
+          </article>
+        </div>
+      </section>
+    </main>
+    <footer class="footer">
+      Dietyaar product walkthrough · derived from docs/product/product-spec.md and
+      docs/design/design-scope.md · static review artifact
+    </footer>
+    <script>
+      const screens = [
+        [
+          'A01',
+          'Authentication',
+          'Sign in',
+          'Start or resume with an email one-time code.',
+          'Email sign-in',
+          'Enter your email and we will send a one-time code.',
+          'Email address|Privacy and Terms links',
+          'Send code',
+          'Initial, invalid email, submitting, rate limited, service failure',
+          'Do not reveal whether an email has an account.',
+          'Email authentication is intentionally passwordless.',
+        ],
+        [
+          'A02',
+          'Authentication',
+          'Verify email code',
+          'Complete authentication or return to the first incomplete onboarding step.',
+          'Confirm your code',
+          'A masked email, accessible code input, resend timing, and expiry guidance.',
+          'Code · · · · · ·|Resend after countdown',
+          'Verify code',
+          'Waiting, verifying, invalid, expired, too many attempts, resent',
+          'Support paste and an accessible single-field alternative.',
+          'No account enumeration.',
+        ],
+        [
+          'O01',
+          'Onboarding',
+          'Welcome & language',
+          'Set expectations, then retain the person’s chosen interface language.',
+          'A calm start',
+          'Add your plan, log meals, then review progress—always check estimates first.',
+          'فارسی|English|Three-step overview',
+          'Continue',
+          'Initial, saved locale',
+          'Persian is the default locale and the full information architecture mirrors in English.',
+          'Language affects presentation—not user-entered plan or meal text.',
+        ],
+        [
+          'O02',
+          'Onboarding',
+          'Eligibility & consent',
+          'Collect adult eligibility once and separate required legal consent from optional AI consent.',
+          'Eligibility and privacy',
+          'This app supports adults following non-clinical plans.',
+          'Age|Required terms acceptance|Optional AI processing consent',
+          'Save & continue',
+          'Under 18 blocked, missing terms, policy unavailable, AI granted, AI declined',
+          'AI consent distinctly covers plan images, meal photos, and daily summary writing.',
+          'Declining AI never removes manual paths.',
+        ],
+        [
+          'O03',
+          'Onboarding',
+          'Profile basics',
+          'Offer private personalization without making any attribute necessary.',
+          'About you (optional)',
+          'Name and units are useful; height, profile weight, gender, and birth year can all be skipped.',
+          'Preferred name|Metric / imperial|Height · profile weight · gender · birth year',
+          'Continue',
+          'All skipped, partial, invalid field, unusual measurement, saved or failed',
+          'Age is not repeated here; birth year never replaces eligibility.',
+          'Profile weight does not enable weight tracking or add a history entry.',
+        ],
+        [
+          'O04',
+          'Onboarding',
+          'Goal & plan context',
+          'Capture non-clinical context for an existing plan, without prescribing one.',
+          'Your existing plan',
+          'Tell us your goal and where the plan came from.',
+          'Lose / maintain / gain|Dietitian / coach / self|Optional dietary notes',
+          'Continue',
+          'Medical-purpose plan blocked from activation, no-plan path',
+          'Medical plans may not be activated in this MVP.',
+          'No diagnosis, clinical coaching, or allergen detection.',
+        ],
+        [
+          'O05',
+          'Onboarding',
+          'Time & appearance',
+          'Confirm local context and preferences before the first daily check-in.',
+          'Time and appearance',
+          'Your morning reflection is timed for your selected timezone.',
+          'Asia/Tehran|08:00|System · light · dark',
+          'Save preferences',
+          'Timezone changed, push introduction, saved or failed',
+          'Push permission is asked only after an explanation and separate choice.',
+          'Locale and appearance may be changed later.',
+        ],
+        [
+          'O06',
+          'Onboarding',
+          'Add a plan',
+          'Start a structured plan manually, extract a selected image with consent, or continue without a plan.',
+          'How would you like to add it?',
+          'Manual entry is always available. Image extraction is optional.',
+          'Manual plan|JPEG / PNG / WebP, up to 10 MB|Continue without a plan',
+          'Start manual entry',
+          'AI unavailable, camera denied, unsupported image, extraction failed, quota reached',
+          'Pasted-text extraction is intentionally not an MVP route.',
+          'An imported plan stays a draft until reviewed and activated.',
+        ],
+        [
+          'O07',
+          'Onboarding',
+          'Plan editor',
+          'Build or correct a versioned structured plan before it can affect comparisons.',
+          'Weekly balance plan',
+          'Organize days, slots, portions, alternatives, and numeric rules.',
+          'Breakfast · 08:00|Lunch · 13:30|Dinner · 20:00',
+          'Review plan',
+          'Empty draft, processing, extraction failed, unresolved ambiguity, unsaved edits',
+          'First plan defaults to today; a replacement defaults to tomorrow.',
+          'Extracted content is visible as editable draft data.',
+        ],
+        [
+          'O08',
+          'Onboarding',
+          'Activation review',
+          'Make comparison inputs and historical effects explicit before activation.',
+          'Ready to activate?',
+          'Review the slots, targets, effective date, and unavailable comparisons.',
+          'Effective date|Included days|Non-clinical declaration',
+          'Activate plan',
+          'Blocking ambiguity, overlap, past-date confirmation, stale revision, activation failure',
+          'Activation creates an immutable plan version.',
+          'No comparison applies before this explicit action.',
+        ],
+        [
+          'O09',
+          'Onboarding',
+          'First action',
+          'Finish onboarding whether or not a plan is active.',
+          'You are ready',
+          'Log your first meal, view Today, or add a plan when you are ready.',
+          'Today preview|Log first meal|Add a plan',
+          'Log first meal',
+          'Active-plan success, no-plan state, optional push setup',
+          'The main application remains usable without an active plan.',
+          'No-plan Today hides plan matching and numeric comparisons.',
+        ],
+        [
+          'T01',
+          'Today',
+          'Today',
+          'One calm daily overview with exactly one useful next action.',
+          'Saturday, 21 November',
+          'A small check-in, confirmed meals, planned slots, and known nutrition totals.',
+          'Morning reflection|1,240 kcal known|Protein 72 g|Lunch planned',
+          'Log a meal',
+          'No plan, partial, complete, draft, unknown nutrients, offline, future read-only',
+          'Totals include confirmed meals only; unknown is never silently zero.',
+          'Weight does not appear on Today by default.',
+        ],
+        [
+          'M01',
+          'Meals',
+          'Log meal method',
+          'Choose a fast, recoverable entry path in a sheet.',
+          'How would you like to log?',
+          'Use a photo for editable food recognition, or continue manually.',
+          'Take/upload photo|Structured manual|Saved meals|Recent meals',
+          'Structured manual',
+          'Saved/recent empty, consent absent, camera denied, photo failure, processing',
+          'An unavailable photo route always preserves access to manual entry.',
+          'Standalone meal-text analysis is not included.',
+        ],
+        [
+          'M02',
+          'Meals',
+          'Meal details',
+          'Capture time, type, items, and an optional link to a planned slot.',
+          'Meal details',
+          'All reused and recognized items remain editable before review.',
+          'Lunch · 13:30|Planned lunch slot|Cooked rice · 180 g',
+          'Review meal',
+          'Future time, incomplete item, draft restored, recognition processing or failed',
+          'Photos may be removed or replaced before confirmation.',
+          'An optional context note does not become nutrition provenance.',
+        ],
+        [
+          'M03',
+          'Meals',
+          'Meal review',
+          'Review food, portions, nutrition sources, and plan relationship before confirmation.',
+          'Review your meal',
+          'Resolve uncertain portions and leave unknown values visibly unknown.',
+          'Chicken kebab · database|Rice · portion conversion|Salad · manual value',
+          'Confirm meal',
+          'Recognition ready, incomplete nutrition, lookup unavailable, duplicate warning, conflict',
+          'AI-recognized names are candidates only—not final nutrient sources.',
+          'Confirmation is required before totals or plan matching change.',
+        ],
+        [
+          'M04',
+          'Meals',
+          'Meal detail',
+          'Inspect a confirmed meal or revise it through the same review component.',
+          'Lunch · confirmed',
+          'See items, totals, provenance, slot matching, and edit history.',
+          'Consumed 13:30|539 kcal known|Matched to lunch slot',
+          'Edit meal',
+          'Read-only, revision conflict, delete confirmation, undo',
+          'Deletion offers a short Undo after returning to the day.',
+          'Saving a reusable copy does not alter historic meals.',
+        ],
+        [
+          'M05',
+          'Meals',
+          'Saved meals',
+          'Reuse templates without changing previously confirmed meals.',
+          'Saved meals',
+          'Search, start an editable draft, rename, edit, or delete a template.',
+          'Chicken & rice|Overnight oats|Search saved meals',
+          'Use as draft',
+          'Empty, search results, no match, delete confirmation',
+          'A template is a convenience, never a retroactive edit tool.',
+          'Every reuse begins as an editable draft.',
+        ],
+        [
+          'H01',
+          'History',
+          'History',
+          'Review recent data and optional weight trends without an adherence score.',
+          'Last 7 days',
+          'See completeness, known energy, applicable plans, and unknown-data markers.',
+          'Sat · complete|Sun · partial|Weight tracking optional',
+          'Open day detail',
+          'No history, partial history, no plan, unknown totals, tracking states',
+          'Weight change is a separate signal and has no causal claims.',
+          'No single score collapses a person’s progress.',
+        ],
+        [
+          'H02',
+          'History',
+          'Day detail',
+          'Review or correct a past day using the same grounded daily components.',
+          'Tuesday, 18 November',
+          'Confirmed meals and the applicable historical plan version are shown.',
+          'Meals|Planned slots|Complete day status',
+          'Log a meal',
+          'Historical equivalents of Today; future date read-only',
+          'Morning content may be displayed historically but is not regenerated.',
+          'Plan comparisons use the version applicable to that date.',
+        ],
+        [
+          'H03',
+          'History',
+          'Add weight',
+          'Record a deliberate, optional measurement after tracking is enabled.',
+          'Add weight',
+          'Choose a value, unit, date, and optionally a time.',
+          '78.4 kg|Measurement date|Previous: 79.0 kg',
+          'Save weight',
+          'Invalid/unusual, duplicate-time warning, save failure',
+          'Metric and imperial inputs show a conversion preview.',
+          'This is separate from onboarding profile weight.',
+        ],
+        [
+          'H04',
+          'History',
+          'Weight history',
+          'Show neutral measurement history only after it has been explicitly created.',
+          'Weight history',
+          'Compare measurements over a chosen period without predictions.',
+          'Starting 79.0 kg|Current 78.4 kg|Chronological entries',
+          'Add measurement',
+          'Empty, one entry, multiple entries, delete confirmation',
+          'No BMI, ideal weight, target line, forecast, or achievement label.',
+          'Never attribute a change to individual meals.',
+        ],
+        [
+          'P01',
+          'Plans',
+          'Plan overview',
+          'Understand the active plan and all version-management entry points.',
+          'Weekly balance plan',
+          'The active version begins 16 Nov and came from a dietitian.',
+          'Goal: weight loss|4 daily slots|1,600–1,800 kcal',
+          'View plan',
+          'No active plan, active plan, pending draft, scheduled replacement',
+          'Qualitative plans explain when numeric comparisons are unavailable.',
+          'Past plan versions remain discoverable.',
+        ],
+        [
+          'P02',
+          'Plans',
+          'Plan detail',
+          'Inspect an immutable snapshot used for a date’s comparisons.',
+          'Plan version · active',
+          'Slots, alternatives, rules, and effective dates stay readable.',
+          'Breakfast · 08:00|Protein + grain + vegetables|Energy range',
+          'View version history',
+          'No numeric targets, inherited/scheduled version, unavailable source',
+          'Immutable means later editing creates a new version rather than rewriting history.',
+          'User-entered mixed Persian and English text keeps its original direction.',
+        ],
+        [
+          'P03',
+          'Plans',
+          'Create or replace',
+          'Create a draft for a later date while preserving past comparisons.',
+          'Create a new version',
+          'Copy an existing plan or start from an empty structured draft.',
+          'New effective date|Copy active version|Manual or image draft',
+          'Create draft',
+          'No active plan, overlap, unsaved draft, validation error',
+          'Replacement defaults to tomorrow in the user’s timezone.',
+          'This flow reuses the plan editor and activation review.',
+        ],
+        [
+          'P04',
+          'Plans',
+          'Version history',
+          'Compare current, historical, and scheduled plan versions.',
+          'Plan versions',
+          'Past plans stay available as the explanation for past comparisons.',
+          'Active · 16 Nov|Scheduled · 1 Dec|Historical · 1 Oct',
+          'Open version',
+          'One version, multiple versions, scheduled replacement',
+          'A history list is context—not an invitation to silently modify records.',
+          'Only an explicit new activation changes the future plan.',
+        ],
+        [
+          'S01',
+          'Settings',
+          'Settings',
+          'A clear control centre for the account and application.',
+          'Settings',
+          'Manage your profile, presentation, time, privacy, and data.',
+          'Profile & goals|Language & appearance|Privacy & AI',
+          'Open settings section',
+          'Loading, saved, recoverable error',
+          'Settings do not hide required safeguards behind vague labels.',
+          'Each route explains its scope before changing data.',
+        ],
+        [
+          'S02',
+          'Settings',
+          'Profile & goals',
+          'Edit optional attributes and independently manage weight tracking.',
+          'Profile & goals',
+          'Personal details remain optional and private.',
+          'Name|Height|Profile weight|Enable weight tracking',
+          'Save changes',
+          'All empty, partial, edit/clear, tracking disabled or enabled',
+          'Profile weight can prefill a new measurement only after opt-in.',
+          'Editing it never changes weight history.',
+        ],
+        [
+          'S03',
+          'Settings',
+          'Language & appearance',
+          'Switch the runtime locale and visual preference safely.',
+          'Language & appearance',
+          'Choose Persian/English and system/light/dark appearance.',
+          'فارسی|English|System · light · dark',
+          'Save appearance',
+          'Saving, system change, failed save',
+          'Persian uses RTL, Persian numerals, and Solar Hijri presentation.',
+          'A locale change preserves all user-entered content.',
+        ],
+        [
+          'S04',
+          'Settings',
+          'Time & notifications',
+          'Control timezone, check-in time, and optional push.',
+          'Time & notifications',
+          'Morning messages are scheduled in your selected timezone.',
+          'Asia/Tehran|08:00|Configure push',
+          'Save notification preferences',
+          'Timezone/time validation, permission denied, push unsupported',
+          'Browser permission follows explanation and an explicit request.',
+          'No push is required for the in-app daily card.',
+        ],
+        [
+          'S05',
+          'Settings',
+          'Privacy & AI',
+          'Review or withdraw consent and see the manual alternative plainly.',
+          'Privacy & AI',
+          'AI processing is optional and independently explained.',
+          'Plan image extraction|Meal photo recognition|Morning writing',
+          'Update AI consent',
+          'Granted, declined, withdrawal, provider unavailable',
+          'Withdrawal disables both image routes and selects deterministic check-ins.',
+          'Nothing generated by AI confirms or overwrites a record.',
+        ],
+        [
+          'S06',
+          'Settings',
+          'Data controls',
+          'Request a portable export or begin a deliberate account deletion flow.',
+          'Your data',
+          'Exports and account deletion are explicit, separate choices.',
+          'Request export|Export status|Delete account',
+          'Request export',
+          'Export pending/ready/failed, deletion entry',
+          'A data export is not a deletion request.',
+          'Private media and signed links require extra care.',
+        ],
+        [
+          'S07',
+          'Settings',
+          'Delete account',
+          'Require unmistakable confirmation before an irreversible request.',
+          'Delete account',
+          'Review what will be deleted, then confirm deliberately.',
+          'Data summary|Required confirmation|Cancel',
+          'Confirm deletion',
+          'Confirmation missing, service failure, deletion scheduled',
+          'Destructive actions must remain visually and semantically distinct.',
+          'This review preview never performs the action.',
+        ],
+        [
+          'L01',
+          'Legal',
+          'Legal document',
+          'Read versioned privacy and terms documents without losing account context.',
+          'Privacy & Terms',
+          'Policies have an effective date, version, and readable sections.',
+          'Privacy policy|Terms of use|Effective date',
+          'Read policy',
+          'Loading, unavailable policy, updated version',
+          'Legal acceptance has a deliberate, recorded consent path in onboarding.',
+          'This is accessible signed-out and signed-in.',
+        ],
+      ];
+      const $ = (s) => document.querySelector(s),
+        nav = $('#nav');
+      let current = 10,
+        fa = false,
+        dark = false;
+      const faText = {
+        Today: 'امروز',
+        'Sign in': 'ورود',
+        'Welcome & language': 'خوش‌آمد و زبان',
+        'Eligibility & consent': 'شرایط و رضایت',
+        'Profile basics': 'مشخصات پایه',
+        'Goal & plan context': 'هدف و زمینه برنامه',
+        'Time & appearance': 'زمان و ظاهر',
+        'Add a plan': 'افزودن برنامه',
+        'Plan editor': 'ویرایش برنامه',
+        'Activation review': 'تأیید فعال‌سازی',
+        'First action': 'اولین اقدام',
+        'Meal method': 'روش ثبت وعده',
+        'Meal details': 'جزئیات وعده',
+        'Meal review': 'مرور وعده',
+        'Meal detail': 'نمایش وعده',
+        'Saved meals': 'وعده‌های ذخیره‌شده',
+        History: 'تاریخچه',
+        'Day detail': 'جزئیات روز',
+        'Add weight': 'ثبت وزن',
+        'Weight history': 'تاریخچه وزن',
+        'Plan overview': 'نمای کلی برنامه',
+        'Plan detail': 'جزئیات برنامه',
+        'Create or replace': 'ساخت یا جایگزینی',
+        'Version history': 'تاریخچه نسخه‌ها',
+        Settings: 'تنظیمات',
+        'Profile & goals': 'پروفایل و اهداف',
+        'Language & appearance': 'زبان و ظاهر',
+        'Time & notifications': 'زمان و اعلان‌ها',
+        'Privacy & AI': 'حریم خصوصی و AI',
+        'Data controls': 'کنترل داده',
+        'Delete account': 'تأیید حذف حساب',
+        'Legal document': 'اسناد حقوقی',
+        'Verify email code': 'تأیید کد ایمیل',
+      };
+      function label(s) {
+        return fa ? faText[s] || s : s;
+      }
+      function render() {
+        const s = screens[current],
+          [id, group, title, desc, heading, copy, examples, action, state, validation, guard] = s;
+        document.documentElement.lang = fa ? 'fa' : 'en';
+        document.documentElement.dir = fa ? 'rtl' : 'ltr';
+        document.body.classList.toggle('rtl', fa);
+        document.body.style.background = dark ? '#1c1c1c' : '#fff';
+        document.body.style.color = dark ? '#fff' : '#171717';
+        document.querySelector('.top').style.background = dark
+          ? 'rgba(28,28,28,.94)'
+          : 'rgba(255,255,255,.94)';
+        document
+          .querySelectorAll('.btn')
+          .forEach((x) => (x.style.background = dark ? '#202020' : '#fff'));
+        $('#stageTitle').textContent = label(title);
+        $('#stageDescription').textContent = desc;
+        $('#stageId').textContent = id;
+        $('#crumb').textContent = `${group} / ${id}`;
+        $('#previewTitle').textContent = label(title);
+        $('#typeBadge').textContent = group;
+        $('#primaryHeading').textContent = heading;
+        $('#primaryCopy').textContent = copy;
+        $('#examples').innerHTML = examples
+          .split('|')
+          .map((x) => `<div class="item"><span>${x}</span><span>›</span></div>`)
+          .join('');
+        $('#actionButton').textContent = action;
+        $('#reviewNotes').textContent = validation;
+        $('#guardrail').textContent = guard;
+        $('#states').innerHTML = state
+          .split(', ')
+          .map((x, i) => `<span class="chip ${i > 1 ? 'warn' : ''}">${x}</span>`)
+          .join('');
+        $('#validate').textContent =
+          `Review the standard, empty, recoverable-error, and permission-sensitive variants. This screen belongs to ${group.toLowerCase()} and maintains its documented Back/return path.`;
+        $('#appMeta').textContent = fa ? 'شنبه، ۱ آذر' : 'Saturday, 21 Nov';
+        nav.innerHTML = '';
+        let last = '';
+        screens.forEach((x, i) => {
+          if (x[1] !== last) {
+            last = x[1];
+            nav.insertAdjacentHTML('beforeend', `<h2>${last}</h2>`);
+          }
+          const b = document.createElement('button');
+          b.className = i === current ? 'selected' : '';
+          b.innerHTML = `<span>${label(x[2])}</span><code>${x[0]}</code>`;
+          b.onclick = () => {
+            current = i;
+            render();
+            scrollTo({ top: 190, behavior: 'smooth' });
+          };
+          nav.appendChild(b);
+        });
+      }
+      $('#locale').onclick = () => {
+        fa = !fa;
+        $('#locale').textContent = fa ? 'English' : 'فارسی';
+        render();
+      };
+      $('#mode').onclick = () => {
+        dark = !dark;
+        $('#mode').textContent = dark ? 'Light preview' : 'Dark preview';
+        render();
+      };
+      render();
+    </script>
+  </body>
+</html>

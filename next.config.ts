@@ -7,6 +7,7 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 const nextConfig: NextConfig = {
   reactCompiler: true,
   output: 'standalone',
+  allowedDevOrigins: ['192.168.44.7'],
 
   // pino's pretty transport runs in a worker thread the bundler cannot trace.
   serverExternalPackages: ['pino', 'pino-pretty'],
