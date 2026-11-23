@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { waitForReactHydration } from './helpers/hydration';
 import {
   expectNoWcagViolations,
   installQualityObservers,
@@ -14,11 +15,7 @@ for (const locale of ['en', 'fa'] as const) {
     await page.goto(`/${locale}/register`);
     // The route can be visible before its client form has hydrated. Wait until
     // React has attached props so clicking submit cannot trigger a native reload.
-    await page.waitForFunction(() =>
-      Object.keys(document.querySelector('form') ?? {}).some((key) =>
-        key.startsWith('__reactProps$'),
-      ),
-    );
+    await waitForReactHydration(page, 'form');
     await expectNoWcagViolations(page, testInfo, `${locale}-registration`);
     await page.locator('#displayName').fill(locale === 'fa' ? 'کاربر آزمون' : 'Test user');
     await page.locator('#username').fill(`e2e_${locale}_${suffix}`);

@@ -1,13 +1,6 @@
 import { expect, test } from '@playwright/test';
+import { waitForReactHydration } from './helpers/hydration';
 import { expectNoWcagViolations } from './helpers/quality';
-
-async function waitForHydratedForm(page: import('@playwright/test').Page) {
-  await page.waitForFunction(() =>
-    Object.keys(document.querySelector('form') ?? {}).some((key) =>
-      key.startsWith('__reactProps$'),
-    ),
-  );
-}
 
 for (const locale of ['en', 'fa'] as const) {
   test(`${locale} public identity surfaces meet WCAG AA and reduced-motion gates`, async ({
@@ -16,7 +9,7 @@ for (const locale of ['en', 'fa'] as const) {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     for (const route of ['register', 'login', 'recover'] as const) {
       await page.goto(`/${locale}/${route}`);
-      await waitForHydratedForm(page);
+      await waitForReactHydration(page, 'form');
       await expectNoWcagViolations(page, testInfo, `${locale}-${route}`);
     }
 
@@ -54,7 +47,7 @@ test('offline and transient API failures retain registration input and recover',
   page,
 }, testInfo) => {
   await page.goto('/en/register');
-  await waitForHydratedForm(page);
+  await waitForReactHydration(page, 'form');
   await page.locator('#displayName').fill('Failure test');
   await page.locator('#username').fill(`failure_${Date.now()}`);
   await page.locator('#password').fill('Failure-test-password-123!');
