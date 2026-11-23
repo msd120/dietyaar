@@ -27,6 +27,14 @@ export default defineConfig({
       name: 'mobile-chromium',
       use: { ...devices['Pixel 5'], ...(useSystemChrome ? { channel: 'chrome' } : {}) },
     },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'mobile-webkit',
+      use: { ...devices['iPhone 13'] },
+    },
   ],
   webServer: {
     command: `npm run dev -- --port ${port}`,

@@ -39,6 +39,7 @@ services:
       retries: 15
 
   web:
+    image: dietyaar-local:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -51,6 +52,43 @@ services:
     environment:
       # Inside the compose network the database host is the service name.
       DATABASE_URL: postgresql://postgres:postgres@db:5432/app?schema=public
+      DIRECT_URL: postgresql://postgres:postgres@db:5432/app?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Explicit one-off migration job. Run with:
+  #   docker compose --profile ops run --rm migrate
+  # Web replicas never apply schema changes during startup.
+  migrate:
+    image: dietyaar-local:latest
+    profiles: ['ops']
+    command: ['./docker-migrate.sh']
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/app?schema=public
+      DIRECT_URL: postgresql://postgres:postgres@db:5432/app?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Optional enhanced-mode worker from the same immutable image. Core mode
+  # does not start this profile and never depends on it.
+  worker:
+    image: dietyaar-local:latest
+    profiles: ['enhanced']
+    command: ['./docker-worker.sh']
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/app?schema=public
+      DIRECT_URL: postgresql://postgres:postgres@db:5432/app?schema=public
+      WORKER_ENABLED: 'true'
+      AI_PLAN_IMAGE_ENABLED: 'false'
+      AI_MEAL_PHOTO_ENABLED: 'false'
+      AI_REFLECTION_ENABLED: 'false'
     depends_on:
       db:
         condition: service_healthy

@@ -56,7 +56,7 @@ export function WeightForm({
         <Input id="note" name="note" dir="auto" />
       </div>
       {error ? (
-        <p role="alert" className="text-sm text-destructive sm:col-span-2">
+        <p role="alert" className="text-sm text-error sm:col-span-2">
           {t('weightError')}
         </p>
       ) : null}

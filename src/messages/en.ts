@@ -14,6 +14,7 @@ export const en = {
     notFoundTitle: 'This page was not found',
     notFoundDescription: 'The address may have changed, or this page is unavailable.',
     goHome: 'Return to home',
+    offline: 'You are offline. Your unsaved information remains here; reconnect and try again.',
   },
   register: {
     title: 'Create your Dietyaar account',

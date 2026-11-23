@@ -41,7 +41,7 @@
     --brand-600: var(--brand-hue) 76% 36%;
 
     /* ─── Primary = Brand ───────────────────────────────────────── */
-    --primary: var(--brand-hue) var(--brand-saturation) 58%;
+    --primary: var(--brand-hue) 76% 36%;
     --primary-foreground: 0 0% 98%;
 
     /* ─── Neutral Surfaces ──────────────────────────────────────── */
@@ -73,7 +73,7 @@
     --warning-foreground: 0 0% 98%;
     --warning-200: calc(var(--warning-hue) + 10) 81.8% 97.8%;
 
-    --error: var(--destructive-hue) 72% 51%;
+    --error: var(--destructive-hue) 72% 42%;
     --error-foreground: 0 0% 98%;
 
     --info: var(--info-hue) 70% 55%;
@@ -108,7 +108,7 @@
 
     /* ─── Primary = Brand ───────────────────────────────────────── */
     --primary: var(--brand-hue) var(--brand-saturation) 58%;
-    --primary-foreground: 0 0% 98%;
+    --primary-foreground: 0 0% 10%;
 
     /* ─── Neutral Surfaces ──────────────────────────────────────── */
     --background: 240 10% 8%;
@@ -139,7 +139,7 @@
     --warning-foreground: 0 0% 10%;
     --warning-200: calc(var(--warning-hue) + 7) 100% 8%;
 
-    --error: var(--destructive-hue) 72% 51%;
+    --error: var(--destructive-hue) 85% 72%;
     --error-foreground: 0 0% 98%;
 
     --info: var(--info-hue) 70% 55%;

@@ -18,25 +18,30 @@ export function RecoveryForm({ locale }: Readonly<{ locale: string }>) {
     setPending(true);
     setError(false);
     const form = new FormData(event.currentTarget);
-    const response = await fetch('/api/recover', {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: String(form.get('username') ?? ''),
-        code: String(form.get('code') ?? ''),
-        password: String(form.get('password') ?? ''),
-      }),
-    });
-    const payload = (await response.json().catch(() => null)) as {
-      replacementCode?: string;
-    } | null;
-    setPending(false);
-    if (!response.ok || !payload?.replacementCode) {
+    try {
+      const response = await fetch('/api/recover', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: String(form.get('username') ?? ''),
+          code: String(form.get('code') ?? ''),
+          password: String(form.get('password') ?? ''),
+        }),
+      });
+      const payload = (await response.json().catch(() => null)) as {
+        replacementCode?: string;
+      } | null;
+      if (!response.ok || !payload?.replacementCode) {
+        setError(true);
+        return;
+      }
+      setReplacementCode(payload.replacementCode);
+    } catch {
       setError(true);
-      return;
+    } finally {
+      setPending(false);
     }
-    setReplacementCode(payload.replacementCode);
   }
 
   if (replacementCode) {
@@ -92,7 +97,7 @@ export function RecoveryForm({ locale }: Readonly<{ locale: string }>) {
         />
       </div>
       {error ? (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-sm text-error">
           {t('error')}
         </p>
       ) : null}

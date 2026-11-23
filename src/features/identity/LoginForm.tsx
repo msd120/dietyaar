@@ -17,22 +17,27 @@ export function LoginForm({ locale }: Readonly<{ locale: string }>) {
     setPending(true);
     setError(false);
     const form = new FormData(event.currentTarget);
-    const response = await fetch('/api/login', {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: String(form.get('username') ?? ''),
-        password: String(form.get('password') ?? ''),
-      }),
-    });
-    setPending(false);
-    if (!response.ok) {
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: String(form.get('username') ?? ''),
+          password: String(form.get('password') ?? ''),
+        }),
+      });
+      if (!response.ok) {
+        setError(true);
+        return;
+      }
+      router.push(`/${locale}/onboarding`);
+      router.refresh();
+    } catch {
       setError(true);
-      return;
+    } finally {
+      setPending(false);
     }
-    router.push(`/${locale}/onboarding`);
-    router.refresh();
   }
 
   return (
@@ -54,7 +59,7 @@ export function LoginForm({ locale }: Readonly<{ locale: string }>) {
         />
       </div>
       {error ? (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-sm text-error">
           {t('error')}
         </p>
       ) : null}

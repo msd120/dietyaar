@@ -1,10 +1,16 @@
 import { expect, test } from '@playwright/test';
+import {
+  expectNoWcagViolations,
+  installQualityObservers,
+  readQualityMetrics,
+} from './helpers/quality';
 
 for (const locale of ['en', 'fa'] as const) {
   test(`${locale} manual core journey remains accessible and deterministic`, async ({
     page,
   }, testInfo) => {
     const suffix = `${Date.now()}${testInfo.workerIndex}`.slice(-10);
+    await installQualityObservers(page);
     await page.goto(`/${locale}/register`);
     // The route can be visible before its client form has hydrated. Wait until
     // React has attached props so clicking submit cannot trigger a native reload.
@@ -13,6 +19,7 @@ for (const locale of ['en', 'fa'] as const) {
         key.startsWith('__reactProps$'),
       ),
     );
+    await expectNoWcagViolations(page, testInfo, `${locale}-registration`);
     await page.locator('#displayName').fill(locale === 'fa' ? 'کاربر آزمون' : 'Test user');
     await page.locator('#username').fill(`e2e_${locale}_${suffix}`);
     await page.locator('#password').fill('E2e-test-password-123!');
@@ -59,12 +66,17 @@ for (const locale of ['en', 'fa'] as const) {
       .filter({ has: page.locator('#linkedSlotId') })
       .locator('button[type="submit"]')
       .click();
-    await page
-      .locator('button')
-      .filter({ hasText: /Confirm|تأیید/ })
-      .click();
+    const confirmButton = page.locator('button').filter({ hasText: /Confirm|تأیید/ });
+    const mealSaveStarted = Date.now();
+    await confirmButton.click();
 
     await page.waitForURL(new RegExp(`/${locale}/today`));
+    const mealSaveMs = Date.now() - mealSaveStarted;
+    await testInfo.attach(`${locale}-meal-save-performance`, {
+      body: JSON.stringify({ mealSaveMs, targetMs: 1500 }),
+      contentType: 'application/json',
+    });
+    expect(mealSaveMs).toBeLessThanOrEqual(1500);
     await expect(page.getByText(locale === 'fa' ? 'صبحانه آزمون' : 'Test breakfast')).toBeVisible();
     await expect(page.getByText('500', { exact: false }).first()).toBeVisible();
     expect(
@@ -75,5 +87,16 @@ for (const locale of ['en', 'fa'] as const) {
 
     await page.keyboard.press('Tab');
     await expect(page.locator(':focus')).toBeVisible();
+    await page.waitForTimeout(250);
+    await expectNoWcagViolations(page, testInfo, `${locale}-today`);
+    const metrics = await readQualityMetrics(page);
+    await testInfo.attach(`${locale}-web-vitals`, {
+      body: JSON.stringify(metrics),
+      contentType: 'application/json',
+    });
+    if (testInfo.project.name.includes('chromium')) expect(metrics.lcp).toBeGreaterThan(0);
+    expect(metrics.lcp).toBeLessThanOrEqual(2500);
+    expect(metrics.inp).toBeLessThanOrEqual(200);
+    expect(metrics.cls).toBeLessThanOrEqual(0.1);
   });
 }

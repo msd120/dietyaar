@@ -48,7 +48,7 @@ export function AccountControls({ locale }: { locale: 'fa' | 'en' }) {
       </Link>
 
       <form className="mt-8 rounded-xl border border-destructive/40 p-4" onSubmit={deleteAccount}>
-        <h3 className="font-semibold text-destructive">{t('deleteAccount')}</h3>
+        <h3 className="font-semibold text-error">{t('deleteAccount')}</h3>
         <p className="mt-2 text-sm text-muted-foreground">{t('deleteWarning')}</p>
         <label className="mt-4 block text-sm font-medium" htmlFor="delete-password">
           {t('password')}
@@ -72,7 +72,7 @@ export function AccountControls({ locale }: { locale: 'fa' | 'en' }) {
           <span>{t('deleteConfirm')}</span>
         </label>
         {error ? (
-          <p className="mt-3 text-sm text-destructive" role="alert">
+          <p className="mt-3 text-sm text-error" role="alert">
             {t('deleteError')}
           </p>
         ) : null}

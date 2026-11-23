@@ -65,7 +65,7 @@ export function UserFoodForm({
             <Label htmlFor="sourceNote">{t('sourceNote')}</Label>
             <Input id="sourceNote" name="sourceNote" dir="auto" />
           </div>
-          {error ? <p className="text-sm text-destructive">{t('userFoodError')}</p> : null}
+          {error ? <p className="text-sm text-error">{t('userFoodError')}</p> : null}
           <Button className="sm:col-span-2" type="submit" loading={pending}>
             {t('saveUserFood')}
           </Button>

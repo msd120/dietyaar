@@ -1,7 +1,6 @@
-# syntax=docker/dockerfile:1.7
-
 # ─── Base ─────────────────────────────────────────────────────────────────
-FROM node:24.22.1-slim AS base
+ARG NODE_IMAGE=node:24.22.1-slim
+FROM ${NODE_IMAGE} AS base
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1 \
     npm_config_fetch_retries=5 \
@@ -21,21 +20,23 @@ RUN apt-get -o Acquire::Check-Valid-Until=false update -y \
 # ─── Builder ──────────────────────────────────────────────────────────────
 FROM base AS builder
 
-ARG BETTER_AUTH_SECRET
-
 COPY package.json package-lock.json .npmrc ./
 RUN --mount=type=cache,target=/root/.npm \
     npm ci --prefer-offline --no-audit --no-fund
 
 COPY . .
-RUN npx prisma generate
+RUN DATABASE_URL="postgresql://build:build@localhost:5432/build" \
+    DIRECT_URL="postgresql://build:build@localhost:5432/build" \
+    npx prisma generate
 
 # `next build` evaluates src/lib/env.ts; a syntactically valid placeholder is enough.
-ENV DATABASE_URL="postgresql://build:build@localhost:5432/build" \
-    BETTER_AUTH_SECRET=$BETTER_AUTH_SECRET
-RUN npm run build
+RUN DATABASE_URL="postgresql://build:build@localhost:5432/build" \
+    DIRECT_URL="postgresql://build:build@localhost:5432/build" \
+    BETTER_AUTH_SECRET="local-docker-build-placeholder-at-least-32-chars" \
+    npm run build
+RUN npm run build:worker
 
-# Prisma CLI for `migrate deploy` at container start, installed on its own so
+# Prisma CLI for the separate one-off `migrate deploy` command, installed on its own so
 # npm resolves its full dependency closure (the standalone output only traces
 # what the app imports at runtime).
 RUN --mount=type=cache,target=/root/.npm \
@@ -54,13 +55,15 @@ RUN addgroup --system --gid 1001 nodejs \
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/.next/worker.cjs ./.next/worker.cjs
 
 # Schema + migrations + the standalone Prisma CLI.
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /opt/prisma-cli /opt/prisma-cli
 
-COPY --chown=nextjs:nodejs docker-entrypoint.sh ./
-RUN chmod +x docker-entrypoint.sh
+COPY --chown=nextjs:nodejs docker-entrypoint.sh docker-migrate.sh docker-worker.sh ./
+RUN sed -i 's/\r$//' docker-entrypoint.sh docker-migrate.sh docker-worker.sh \
+    && chmod +x docker-entrypoint.sh docker-migrate.sh docker-worker.sh
 
 USER nextjs
 EXPOSE 3000

@@ -1,5 +1,15 @@
 # Dietyaar audit reconciliation and improvement plan
 
+## QLT-02 completion update — 2026-11-23
+
+This update supersedes the older QLT-02/current-next-task statements below. Local pre-deployment quality hardening is now implemented: bilingual offline status and network-exception recovery, retained identity-form inputs, WCAG A/AA and contrast automation with `axe-core`, corrected primary/error contrast, 44px primary controls, reduced-motion assertions, keyboard/overflow checks, Core Web Vitals smoke budgets, confirmed-meal latency budget, and real local PostgreSQL outage/recovery evidence. The safe local half of `OPS-01` is also complete: a production Docker image builds, web/migration/optional-worker commands are separate, replicas do not migrate on startup, the 13-migration one-off job passes, web health and restart return HTTP 200, and the optional worker is fail-closed by default and starts as non-root when explicitly enabled.
+
+Verification now includes 10/10 Chromium desktop/mobile quality cases and 5/5 Firefox cases on the local production build. The database health sequence was `200 healthy → 503 degraded → 200 healthy` across a controlled local PostgreSQL stop/restart, with no reset or data deletion. Unit tests remain 106/106 and the production build passes.
+
+Mobile WebKit is configured in Playwright and CI now installs Chromium, Firefox, and WebKit. The WebKit binary could not be downloaded locally because every Playwright CDN mirror timed out, so no local WebKit pass is claimed. Likewise, the local LCP/INP/CLS and meal-save assertions are synthetic smoke gates, not p75 field evidence on a real mid-range mobile/4G population.
+
+**Current development position:** P7 `OPS-01`, with its local image/command/migration/probe/worker rehearsal complete. The next incomplete roadmap work is the external portion of `OPS-01`: fresh Darkube/Supabase deployment, connectivity, secrets/probes/logs, gradual rollout, rollback, and best-effort export/restore/pause recovery evidence. Those actions remain gated by successful WebKit/CI evidence, representative performance evidence, production nutrition-source approval, owner decisions for legal/privacy/clinical/visual/public-demo policy, and explicit external authorization. No deployment or external platform operation was performed in this update.
+
 ## Final local pre-deployment update — 2026-11-22
 
 This section supersedes all older implementation-status, current-phase, next-task, and verification statements below. The root `implementation-plan.md` was read in full and remains the previously approved execution-ready roadmap: seven phases, exactly 36 atomic task IDs, the same dependency chain, and task-level acceptance criteria. No revised roadmap was found.

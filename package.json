@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:worker": "esbuild src/worker/run.ts --bundle --platform=node --format=cjs --outfile=.next/worker.cjs --external:@prisma/client --external:.prisma/client --external:pino --alias:server-only=./src/worker/server-only-shim.ts",
     "start": "next start",
     "worker": "tsx src/worker/run.ts",
     "lint": "eslint",
@@ -80,6 +81,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^26",

@@ -5,6 +5,7 @@ import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { DirectionProvider, Toaster } from '@/components/UiComponents';
+import { OnlineStatus } from '@/features/system/OnlineStatus';
 import { routing } from '@/i18n/routing';
 import { APP_DESCRIPTION, APP_NAME } from '@/lib/app-config';
 import '../globals.css';
@@ -38,6 +39,7 @@ export default async function LocaleLayout({
       <body className="bg-background font-sans text-foreground antialiased">
         <NextIntlClientProvider messages={messages}>
           <DirectionProvider dir={direction}>
+            <OnlineStatus />
             {children}
             <Toaster />
           </DirectionProvider>

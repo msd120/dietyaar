@@ -75,7 +75,7 @@ export function ManualMealForm({
       <div className="space-y-5">
         <p className="rounded-lg border bg-muted/40 p-4 text-sm">{t('ready')}</p>
         {error ? (
-          <p role="alert" className="text-sm text-destructive">
+          <p role="alert" className="text-sm text-error">
             {t('error')}
           </p>
         ) : null}
@@ -152,7 +152,7 @@ export function ManualMealForm({
         </div>
       </details>
       {error ? (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-sm text-error">
           {t('error')}
         </p>
       ) : null}

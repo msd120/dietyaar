@@ -15,5 +15,7 @@ Implementation evidence and operating notes:
 - [Compatibility baseline](engineering/compatibility-report.md)
 - [Database migrations](engineering/database-migrations.md)
 - [Configuration and security boundaries](engineering/configuration-security.md)
+- [Deployment runbook and OPS-01 evidence](engineering/deployment-runbook.md)
+- [Pre-deployment verification](engineering/pre-deployment-verification.md)
 
 The technical specification section 1.2 defines precedence when documents conflict. ADRs 001 through 007 are inherited upstream context; ADR-008 records what Dietyaar retains or supersedes.

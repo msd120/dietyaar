@@ -165,7 +165,7 @@ export function SettingsForm({
         ))}
       </fieldset>
       {status ? (
-        <p role="status" className={status === 'error' ? 'text-destructive' : 'text-primary'}>
+        <p role="status" className={status === 'error' ? 'text-error' : 'text-primary'}>
           {t(status)}
         </p>
       ) : null}

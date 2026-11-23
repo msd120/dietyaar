@@ -19,27 +19,30 @@ export function RegisterForm({ locale }: Readonly<{ locale: string }>) {
     setPending(true);
     setError(false);
     const form = new FormData(event.currentTarget);
-    const response = await fetch('/api/register', {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        displayName: String(form.get('displayName') ?? ''),
-        username: String(form.get('username') ?? ''),
-        password: String(form.get('password') ?? ''),
-      }),
-    });
-    const payload = (await response.json().catch(() => null)) as { recoveryCode?: string } | null;
-    setPending(false);
-    if (!response.ok) {
+    try {
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          displayName: String(form.get('displayName') ?? ''),
+          username: String(form.get('username') ?? ''),
+          password: String(form.get('password') ?? ''),
+        }),
+      });
+      const payload = (await response.json().catch(() => null)) as {
+        recoveryCode?: string;
+      } | null;
+      if (!response.ok || !payload?.recoveryCode) {
+        setError(true);
+        return;
+      }
+      setRecoveryCode(payload.recoveryCode);
+    } catch {
       setError(true);
-      return;
+    } finally {
+      setPending(false);
     }
-    if (!payload?.recoveryCode) {
-      setError(true);
-      return;
-    }
-    setRecoveryCode(payload.recoveryCode);
   }
 
   if (recoveryCode) {
@@ -99,7 +102,7 @@ export function RegisterForm({ locale }: Readonly<{ locale: string }>) {
       </div>
       <p className="text-xs leading-6 text-muted-foreground">{t('validation')}</p>
       {error ? (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-sm text-error">
           {t('error')}
         </p>
       ) : null}
