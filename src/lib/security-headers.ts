@@ -1,4 +1,5 @@
 const development = process.env.NODE_ENV !== 'production';
+const plainHttpE2E = process.env.DIETYAAR_E2E_HTTP === 'true';
 
 const contentSecurityPolicy = [
   "default-src 'self'",
@@ -14,7 +15,7 @@ const contentSecurityPolicy = [
   "worker-src 'self' blob:",
   "frame-src 'none'",
   "manifest-src 'self'",
-  ...(development ? [] : ['upgrade-insecure-requests']),
+  ...(development || plainHttpE2E ? [] : ['upgrade-insecure-requests']),
 ].join('; ');
 
 export const securityHeaders = [

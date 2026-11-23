@@ -85,6 +85,9 @@ jobs:
       # job's isolated PostgreSQL service, never the build-only placeholder.
       DIRECT_URL: postgresql://postgres:postgres@localhost:5432/app?schema=public
       BETTER_AUTH_URL: http://localhost:3000
+      # The local production server is plain HTTP. WebKit otherwise upgrades
+      # its script URLs to HTTPS via CSP and cannot hydrate the test pages.
+      DIETYAAR_E2E_HTTP: true
       CI: true
     steps:
       - uses: actions/checkout@v4
