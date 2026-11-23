@@ -91,9 +91,14 @@ for (const locale of ['en', 'fa'] as const) {
       body: JSON.stringify(metrics),
       contentType: 'application/json',
     });
-    if (testInfo.project.name.includes('chromium')) expect(metrics.lcp).toBeGreaterThan(0);
-    expect(metrics.lcp).toBeLessThanOrEqual(2500);
-    expect(metrics.inp).toBeLessThanOrEqual(200);
+    // Playwright's Chromium exposes stable lab implementations of LCP and
+    // Event Timing. Firefox and the Linux WebKit port still attach diagnostic
+    // values above, but they are not comparable Core Web Vitals gates.
+    if (testInfo.project.name.includes('chromium')) {
+      expect(metrics.lcp).toBeGreaterThan(0);
+      expect(metrics.lcp).toBeLessThanOrEqual(2500);
+      expect(metrics.inp).toBeLessThanOrEqual(200);
+    }
     expect(metrics.cls).toBeLessThanOrEqual(0.1);
   });
 }
