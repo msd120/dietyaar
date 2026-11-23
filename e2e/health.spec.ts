@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 test('GET /api/health answers without a session cookie', async ({ request }) => {
   const response = await request.get('/api/health', { maxRedirects: 0 });

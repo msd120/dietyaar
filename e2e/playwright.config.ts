@@ -20,6 +20,10 @@ export default defineConfig({
   },
   projects: [
     {
+      name: 'mobile-webkit',
+      use: { ...devices['iPhone 13'] },
+    },
+    {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'], ...(useSystemChrome ? { channel: 'chrome' } : {}) },
     },
@@ -30,10 +34,6 @@ export default defineConfig({
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
-    },
-    {
-      name: 'mobile-webkit',
-      use: { ...devices['iPhone 13'] },
     },
   ],
   webServer: {
