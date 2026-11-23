@@ -84,6 +84,7 @@ jobs:
       # Prisma migrations intentionally use the direct connection to this
       # job's isolated PostgreSQL service, never the build-only placeholder.
       DIRECT_URL: postgresql://postgres:postgres@localhost:5432/app?schema=public
+      BETTER_AUTH_URL: http://localhost:3000
       CI: true
     steps:
       - uses: actions/checkout@v4
@@ -95,6 +96,8 @@ jobs:
       - run: npx prisma generate
       - run: npx playwright install --with-deps chromium firefox webkit
       - run: npm run db:deploy
+      - run: npm run demo:seed
+      - run: npm run build
       - run: npm run test:e2e
 
   docker:
