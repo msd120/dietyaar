@@ -19,6 +19,10 @@ jobs:
   quality:
     name: Lint, typecheck, tests, and build
     runs-on: ubuntu-latest
+    env:
+      # Prisma loads prisma.config.ts even for client generation. This URL is
+      # syntactically valid but generate/build never connect to it.
+      DIRECT_URL: postgresql://build:build@localhost:5432/build
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -77,6 +81,9 @@ jobs:
           --health-retries 10
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/app?schema=public
+      # Prisma migrations intentionally use the direct connection to this
+      # job's isolated PostgreSQL service, never the build-only placeholder.
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/app?schema=public
       CI: true
     steps:
       - uses: actions/checkout@v4

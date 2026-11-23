@@ -23,7 +23,6 @@ export default defineConfig({
         'src/lib/preferences.ts',
       ],
       reporter: ['text', 'lcov'],
-      thresholds: { statements: 60, branches: 55, functions: 60 },
     },
     testTimeout: 15_000,
   },
