@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { waitForReactHydration } from './helpers/hydration';
+import { waitForAppHydration } from './helpers/hydration';
 import { expectNoWcagViolations } from './helpers/quality';
 
 for (const locale of ['en', 'fa'] as const) {
@@ -9,7 +9,7 @@ for (const locale of ['en', 'fa'] as const) {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     for (const route of ['register', 'login', 'recover'] as const) {
       await page.goto(`/${locale}/${route}`);
-      await waitForReactHydration(page, 'form');
+      await waitForAppHydration(page);
       await expectNoWcagViolations(page, testInfo, `${locale}-${route}`);
     }
 
@@ -47,7 +47,7 @@ test('offline and transient API failures retain registration input and recover',
   page,
 }, testInfo) => {
   await page.goto('/en/register');
-  await waitForReactHydration(page, 'form');
+  await waitForAppHydration(page);
   await page.locator('#displayName').fill('Failure test');
   await page.locator('#username').fill(`failure_${Date.now()}`);
   await page.locator('#password').fill('Failure-test-password-123!');

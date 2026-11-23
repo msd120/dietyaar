@@ -1,11 +1,16 @@
-import type { Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
-export async function waitForReactHydration(page: Page, selector: string) {
-  await page.waitForFunction((targetSelector) => {
-    const element = document.querySelector(targetSelector);
+export async function waitForAppHydration(page: Page) {
+  const offlineStatus = page.getByTestId('offline-status');
 
-    return Object.getOwnPropertyNames(element ?? {}).some(
-      (key) => key.startsWith('__reactProps$') || key.startsWith('__reactFiber$'),
-    );
-  }, selector);
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: false });
+    window.dispatchEvent(new Event('offline'));
+  });
+  await expect(offlineStatus).toBeVisible();
+  await page.evaluate(() => {
+    Reflect.deleteProperty(navigator, 'onLine');
+    window.dispatchEvent(new Event('online'));
+  });
+  await expect(offlineStatus).toBeHidden();
 }

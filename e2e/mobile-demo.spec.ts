@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { waitForReactHydration } from './helpers/hydration';
+import { waitForAppHydration } from './helpers/hydration';
 
 const screenIds = [
   'A01',
@@ -46,7 +46,7 @@ for (const viewport of [
 
     test('login, navigation and core screens fit without horizontal overflow', async ({ page }) => {
       await page.goto('/fa');
-      await waitForReactHydration(page, 'button');
+      await waitForAppHydration(page);
       await expect(page.getByText('ورود به دموی دیت‌یار', { exact: true })).toBeVisible();
       expect(
         await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
