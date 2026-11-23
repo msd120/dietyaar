@@ -24,6 +24,8 @@ export const serverEnvSchema = z
     DATABASE_URL: postgresUrl,
     BETTER_AUTH_SECRET: optionalString.pipe(z.string().min(32).optional()),
     BETTER_AUTH_URL: z.url().default('http://localhost:3000'),
+    VERCEL_ENV: z.enum(['development', 'preview', 'production']).optional(),
+    VERCEL_URL: optionalString,
     LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info'),
     PRISMA_LOG_QUERIES: booleanString,
 

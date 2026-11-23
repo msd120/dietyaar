@@ -3,12 +3,20 @@ import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { username } from 'better-auth/plugins';
 import { env } from '@/lib/env';
+import { getAuthOriginConfiguration } from '@/lib/auth-origin';
 import { prisma } from '@/lib/prisma';
 
+const originConfiguration = getAuthOriginConfiguration(env);
+
 export const auth = betterAuth({
-  baseURL: env.BETTER_AUTH_URL,
+  baseURL: originConfiguration.baseURL,
   secret: env.BETTER_AUTH_SECRET,
-  trustedOrigins: [env.BETTER_AUTH_URL, 'http://192.168.44.7:3000'],
+  trustedOrigins: originConfiguration.trustedOrigins,
+  advanced: {
+    // Vercel preview host validation uses the request URL and exact allowlist.
+    // Do not trust caller-controlled x-forwarded-* headers.
+    trustedProxyHeaders: false,
+  },
   database: prismaAdapter(prisma, { provider: 'postgresql' }),
   emailAndPassword: { enabled: true, disableSignUp: false },
   user: { deleteUser: { enabled: true } },
